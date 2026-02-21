@@ -1,5 +1,5 @@
 import { prisma } from '@onecoach/lib-core';
-import { createId } from '@onecoach/lib-shared/utils';
+import { createId, toPrismaJsonValue } from '@onecoach/lib-shared/utils';
 import type {
   WorkoutProgram,
   WorkoutWeek,
@@ -22,7 +22,7 @@ import { ImportOptionsSchema, IMPORT_LIMITS as WORKOUT_LIMITS } from '@onecoach/
 import { FileValidatorService } from './file-validator.service';
 import { FileParserService } from './file-parser.service';
 import { ExerciseMatcherService } from './exercise-matcher.service';
-import type { BaseImportResult } from '@onecoach/lib-import-core';
+import type { BaseImportResult, AIParseContext } from '@onecoach/lib-import-core';
 import { BaseImportService } from '@onecoach/lib-import-core';
 
 /**
@@ -41,7 +41,26 @@ export interface WorkoutImportResult extends BaseImportResult {
     creditsUsed: number;
   };
   // Proprietà extra per compatibilità/debug
-  parseResult?: any;
+  parseResult?: ParseReviewResult;
+}
+
+/**
+ * Review result containing program data, warnings, and unmatched exercises.
+ */
+interface ParseReviewResult {
+  program: ImportedWorkoutProgram;
+  warnings: string[];
+  unmatchedExercises: Array<{
+    name: string;
+    suggestions: Array<{ id: string; name: string; score: number }>;
+  }>;
+  stats: {
+    filesProcessed: number;
+    parsingWarnings: number;
+    parsingErrors: number;
+    matchedExercises: number;
+    unmatchedExercises: number;
+  };
 }
 
 /**
@@ -78,6 +97,7 @@ type ParsedWorkoutData = {
   };
   /** Import stats (set after processing) */
   importStats?: {
+    filesProcessed: number;
     exercisesTotal: number;
     exercisesMatched: number;
     exercisesCreated: number;
@@ -88,7 +108,7 @@ type ParsedWorkoutData = {
   /** Flag for review mode */
   needsReview?: boolean;
   /** Parse result for review */
-  parseResult?: any;
+  parseResult?: ParseReviewResult;
 };
 
 /**
@@ -152,7 +172,7 @@ export class WorkoutImportService extends BaseImportService<
     const parseResults = await FileParserService.parseFiles(
       files,
       importOptions,
-      this.aiContext as unknown as any // FileParserService uses its own AIContext format
+      this.aiContext as AIParseContext // FileParserService uses default AIParseContext generic
     );
 
     // Reset and populate parsing warnings/errors for processParsed
@@ -253,7 +273,11 @@ export class WorkoutImportService extends BaseImportService<
           warnings: this.parsingWarnings,
           unmatchedExercises: unmatchedNames.map((name) => ({
             name,
-            suggestions: matches.get(name)?.suggestions || [],
+            suggestions: (matches.get(name)?.suggestions || []).map((s) => ({
+              id: s.id,
+              name: s.name,
+              score: s.confidence,
+            })),
           })),
           stats: {
             ...this.parsingStats,
@@ -261,7 +285,7 @@ export class WorkoutImportService extends BaseImportService<
             unmatchedExercises: unmatchedCount,
           },
         },
-      } as any; // Extended for review mode
+      } satisfies ParsedWorkoutData;
     }
 
     // Step 5: Create missing
@@ -321,6 +345,7 @@ export class WorkoutImportService extends BaseImportService<
         parsingErrors: this.parsingStats.parsingErrors,
       },
       importStats: {
+        filesProcessed: this.parsingStats.filesProcessed,
         exercisesTotal: allExercises.length,
         exercisesMatched: matchedCount,
         exercisesCreated,
@@ -331,19 +356,34 @@ export class WorkoutImportService extends BaseImportService<
     };
   }
 
-  protected async persist(processed: any, userId: string): Promise<Partial<WorkoutImportResult>> {
+  protected async persist(processed: ParsedWorkoutData, userId: string): Promise<Partial<WorkoutImportResult>> {
     if (processed.needsReview) {
+      const reviewResult = processed.parseResult;
       // Return review result without persisting
       return {
         success: true,
-        parseResult: processed.parseResult,
+        parseResult: reviewResult,
         warnings: processed.warnings,
         errors: processed.errors,
-        stats: processed.parseResult.stats, // Map appropriately
+        stats: reviewResult
+          ? {
+              filesProcessed: reviewResult.stats.filesProcessed,
+              exercisesTotal: reviewResult.stats.matchedExercises + reviewResult.stats.unmatchedExercises,
+              exercisesMatched: reviewResult.stats.matchedExercises,
+              exercisesCreated: 0,
+              weeksImported: 0,
+              daysImported: 0,
+              creditsUsed: 0,
+            }
+          : undefined,
       };
     }
 
-    const { workoutProgram, stats, warnings, errors } = processed;
+    const { workoutProgram, importStats, warnings, errors } = processed;
+
+    if (!workoutProgram) {
+      throw new Error('Workout program conversion failed: workoutProgram is undefined');
+    }
 
     const result = await prisma.workout_programs.create({
       data: {
@@ -355,8 +395,8 @@ export class WorkoutImportService extends BaseImportService<
         durationWeeks: workoutProgram.durationWeeks,
         goals: workoutProgram.goals,
         status: workoutProgram.status,
-        weeks: workoutProgram.weeks as any,
-        metadata: workoutProgram.metadata as any,
+        weeks: toPrismaJsonValue(workoutProgram.weeks),
+        metadata: toPrismaJsonValue(workoutProgram.metadata),
         version: workoutProgram.version || 1,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -368,7 +408,7 @@ export class WorkoutImportService extends BaseImportService<
     return {
       programId: result.id,
       program: workoutProgram,
-      stats,
+      stats: importStats,
       warnings,
       errors,
     };

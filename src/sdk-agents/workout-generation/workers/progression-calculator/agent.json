@@ -1,11 +1,27 @@
 {
   "id": "progression-calculator",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "type": "agent",
   "description": "Calculates week-to-week progression matrix",
   "interface": {
     "input": { "$ref": "./schema.ts#ProgressionCalculatorInputSchema" },
     "output": { "$ref": "./schema.ts#ProgressionCalculatorOutputSchema" }
+  },
+  "skills": {
+    "path": "skills",
+    "expose": []
+  },
+  "tools": {
+    "source": "registry",
+    "allowlist": []
+  },
+  "progress": {
+    "aiDriven": true,
+    "fallbackSteps": [
+      { "name": "analyzing-schedule", "weight": 20 },
+      { "name": "calculating-progression", "weight": 60 },
+      { "name": "formatting-matrix", "weight": 20 }
+    ]
   },
   "config": {
     "tier": "balanced",

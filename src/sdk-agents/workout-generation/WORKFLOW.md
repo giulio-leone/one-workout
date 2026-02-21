@@ -8,6 +8,7 @@ Exercise selection and workout planning can run in parallel since they depend on
 
 ```yaml
 parallel:
+  weight: 20
   branches:
     - - call: workers/exercise-selector
         input:
@@ -33,6 +34,7 @@ Uses the weekly schedule from planner to calculate intensity/volume progression 
 
 ```yaml
 call: workers/progression-calculator
+weight: 15
 input:
   goals: ${input.goals}
   userProfile: ${input.userProfile}
@@ -48,6 +50,7 @@ Creates the complete Week 1 template with all exercises, sets, reps using select
 
 ```yaml
 call: workers/day-generator
+weight: 25
 input:
   mode: week1
   weekNumber: 1
@@ -67,6 +70,7 @@ This ensures AI-generated exercise names/IDs are mapped to real database IDs.
 
 ```yaml
 transform: merge-exercises
+weight: 5
 input:
   week1Template: ${artifacts.week1Template}
   exerciseCatalog: ${input.exerciseCatalog}
@@ -79,6 +83,7 @@ Progression diff generation and validation can run in parallel as they both depe
 
 ```yaml
 parallel:
+  weight: 25
   branches:
     - - call: workers/progression-diff-generator
         input:
@@ -101,6 +106,7 @@ Pure TypeScript transform that clones Week 1 and applies progression diffs to cr
 
 ```yaml
 transform: assembleWeeksFromDiffs
+weight: 10
 input:
   week1Template: ${artifacts.validatedWeek1.validatedWeek1}
   progressionDiffs: ${artifacts.progressionDiffs}

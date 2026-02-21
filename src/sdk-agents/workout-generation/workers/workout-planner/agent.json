@@ -1,11 +1,28 @@
 {
   "id": "workout-planner",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "type": "agent",
   "description": "Plans weekly structure and training split",
   "interface": {
     "input": { "$ref": "./schema.ts#WorkoutPlannerInputSchema" },
     "output": { "$ref": "./schema.ts#WorkoutPlannerOutputSchema" }
+  },
+  "skills": {
+    "path": "skills",
+    "expose": []
+  },
+  "tools": {
+    "source": "registry",
+    "allowlist": []
+  },
+  "progress": {
+    "aiDriven": true,
+    "fallbackSteps": [
+      { "name": "analyzing-profile", "weight": 20 },
+      { "name": "designing-split", "weight": 40 },
+      { "name": "scheduling-days", "weight": 30 },
+      { "name": "formatting-plan", "weight": 10 }
+    ]
   },
   "config": {
     "tier": "balanced",

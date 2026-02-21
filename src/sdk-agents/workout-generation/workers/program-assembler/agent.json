@@ -1,11 +1,27 @@
 {
   "id": "program-assembler",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "type": "agent",
   "description": "Assembles final workout program with post-processing and metadata",
   "interface": {
     "input": { "$ref": "./schema.ts#ProgramAssemblerInputSchema" },
     "output": { "$ref": "./schema.ts#ProgramAssemblerOutputSchema" }
+  },
+  "skills": {
+    "path": "skills",
+    "expose": []
+  },
+  "tools": {
+    "source": "registry",
+    "allowlist": []
+  },
+  "progress": {
+    "aiDriven": true,
+    "fallbackSteps": [
+      { "name": "collecting-artifacts", "weight": 20 },
+      { "name": "assembling-program", "weight": 50 },
+      { "name": "adding-metadata", "weight": 30 }
+    ]
   },
   "config": {
     "tier": "balanced",

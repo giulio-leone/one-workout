@@ -13,8 +13,8 @@
  */
 
 import { prisma } from '@onecoach/lib-core';
-import type { Prisma } from '@prisma/client';
 import { createId } from '@onecoach/lib-shared/id-generator';
+import { toPrismaJsonValue } from '@onecoach/lib-shared';
 import { mapToWorkoutSession, mapToWorkoutSessions } from './mappers/workout-session.mapper';
 import { hydrateSetGroups } from './helpers/utils/set-group-helpers';
 import { logger } from '@onecoach/lib-core';
@@ -296,7 +296,7 @@ export async function updateWorkoutSession(
     where: { id: sessionId },
     data: {
       ...(updates.exercises && {
-        exercises: updates.exercises as unknown as Prisma.InputJsonValue,
+        exercises: toPrismaJsonValue(updates.exercises as unknown[]),
       }),
       ...(updates.completedAt !== undefined && { completedAt: updates.completedAt }),
       ...(updates.notes !== undefined && { notes: updates.notes }),

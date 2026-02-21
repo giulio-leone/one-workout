@@ -1,11 +1,28 @@
 {
   "id": "exercise-selector",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "type": "agent",
   "description": "Selects optimal exercises from catalog based on goals and constraints",
   "interface": {
     "input": { "$ref": "./schema.ts#ExerciseSelectorInputSchema" },
     "output": { "$ref": "./schema.ts#ExerciseSelectorOutputSchema" }
+  },
+  "skills": {
+    "path": "skills",
+    "expose": []
+  },
+  "tools": {
+    "source": "registry",
+    "allowlist": []
+  },
+  "progress": {
+    "aiDriven": true,
+    "fallbackSteps": [
+      { "name": "analyzing-goals", "weight": 20 },
+      { "name": "filtering-exercises", "weight": 40 },
+      { "name": "ranking-selection", "weight": 30 },
+      { "name": "formatting-output", "weight": 10 }
+    ]
   },
   "config": {
     "tier": "balanced",

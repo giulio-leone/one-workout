@@ -8,6 +8,7 @@
 import { prisma } from '@onecoach/lib-core';
 import { Prisma } from '@prisma/client';
 import { createId } from '@onecoach/lib-shared/id-generator';
+import { toPrismaJsonValue, fromPrismaJson } from '@onecoach/lib-shared';
 import { logger } from '@onecoach/lib-core';
 import type {
   WorkoutTemplate,
@@ -105,7 +106,7 @@ export class WorkoutTemplateService {
         description: data.description?.trim() || null,
         category: data.category?.trim() || null,
         tags: data.tags || [],
-        data: data.data as unknown as Prisma.InputJsonValue,
+        data: toPrismaJsonValue(data.data),
         isPublic: data.isPublic || false,
         usageCount: 0,
         lastUsedAt: null,
@@ -265,7 +266,7 @@ export class WorkoutTemplateService {
       updateData.tags = data.tags;
     }
     if (data.data !== undefined) {
-      updateData.data = data.data as unknown as Prisma.InputJsonValue;
+      updateData.data = toPrismaJsonValue(data.data);
     }
     if (data.isPublic !== undefined) {
       updateData.isPublic = data.isPublic;
@@ -322,7 +323,7 @@ export class WorkoutTemplateService {
       description: template.description || undefined,
       category: template.category || undefined,
       tags: template.tags,
-      data: template.data as unknown as Exercise | WorkoutDay | WorkoutWeek,
+      data: fromPrismaJson<Exercise | WorkoutDay | WorkoutWeek>(template.data)!,
       isPublic: template.isPublic,
       usageCount: template.usageCount,
       lastUsedAt: template.lastUsedAt?.toISOString(),

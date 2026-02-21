@@ -6,7 +6,7 @@
  */
 
 import type { WorkoutSession, Exercise } from '@onecoach/types-workout';
-import { toExerciseArray } from '@onecoach/lib-shared';
+import { toExerciseArrayTyped } from '@onecoach/lib-shared';
 import type { workout_sessions } from '@prisma/client';
 
 /**
@@ -52,6 +52,5 @@ function mapExercisesFromJson(exercisesJson: unknown): Exercise[] {
     return [];
   }
 
-  // Ensure type safety when mapping
-  return toExerciseArray(exercisesJson) as unknown as Exercise[];
+  return toExerciseArrayTyped(exercisesJson);
 }

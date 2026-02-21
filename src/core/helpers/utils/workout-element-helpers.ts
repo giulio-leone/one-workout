@@ -13,8 +13,16 @@ import type {
   Superset,
   Circuit,
   WorkoutElement,
-  Exercise as SchemaExercise,
+  SetGroup,
 } from '@onecoach/schemas';
+
+/**
+ * Minimal interface for exercise calculations.
+ * Both SchemaExercise and ExerciseElement satisfy this via structural typing.
+ */
+interface ExerciseWithSetGroups {
+  setGroups: SetGroup[];
+}
 
 // ============================================================================
 // Local Helpers (for schema types)
@@ -23,7 +31,7 @@ import type {
 /**
  * Count sets for a schema Exercise type
  */
-function countSchemaExerciseSets(exercise: SchemaExercise): number {
+function countSchemaExerciseSets(exercise: ExerciseWithSetGroups): number {
   if (!exercise.setGroups || exercise.setGroups.length === 0) {
     return 0;
   }
@@ -33,7 +41,7 @@ function countSchemaExerciseSets(exercise: SchemaExercise): number {
 /**
  * Calculate volume for a schema Exercise type
  */
-function calculateSchemaExerciseVolume(exercise: SchemaExercise): number {
+function calculateSchemaExerciseVolume(exercise: ExerciseWithSetGroups): number {
   if (!exercise.setGroups || exercise.setGroups.length === 0) {
     return 0;
   }
@@ -95,7 +103,7 @@ export function calculateCardioDuration(cardio: CardioExercise): number {
  * @param exercise - Exercise element
  * @returns Estimated duration in seconds
  */
-export function calculateExerciseDuration(exercise: SchemaExercise): number {
+export function calculateExerciseDuration(exercise: ExerciseWithSetGroups): number {
   if (!exercise.setGroups || exercise.setGroups.length === 0) {
     return 0;
   }
@@ -190,8 +198,7 @@ export function calculateElementDuration(element: WorkoutElement): number {
       return calculateCircuitDuration(element);
     case 'exercise':
     default:
-      // Cast to SchemaExercise - the discriminator 'type' is different from exercise.type
-      return calculateExerciseDuration(element as unknown as SchemaExercise);
+      return calculateExerciseDuration(element);
   }
 }
 
@@ -231,8 +238,7 @@ export function calculateElementVolume(element: WorkoutElement): number {
       return calculateSupersetVolume(element);
     case 'exercise':
     default:
-      // Cast to SchemaExercise - the discriminator 'type' is different from exercise.type
-      return calculateSchemaExerciseVolume(element as unknown as SchemaExercise);
+      return calculateSchemaExerciseVolume(element);
   }
 }
 
@@ -283,8 +289,7 @@ export function countElementSets(element: WorkoutElement): number {
       return countCircuitSets(element);
     case 'exercise':
     default:
-      // Cast to SchemaExercise - the discriminator 'type' is different from exercise.type
-      return countSchemaExerciseSets(element as unknown as SchemaExercise);
+      return countSchemaExerciseSets(element);
   }
 }
 

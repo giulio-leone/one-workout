@@ -1,11 +1,28 @@
 {
   "id": "day-generator",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "type": "agent",
   "description": "Generates detailed workout days with sets, reps, and weights",
   "interface": {
     "input": { "$ref": "./schema.ts#DayGeneratorInputSchema" },
     "output": { "$ref": "./schema.ts#DayGeneratorOutputSchema" }
+  },
+  "skills": {
+    "path": "skills",
+    "expose": []
+  },
+  "tools": {
+    "source": "registry",
+    "allowlist": []
+  },
+  "progress": {
+    "aiDriven": true,
+    "fallbackSteps": [
+      { "name": "loading-schedule", "weight": 10 },
+      { "name": "generating-exercises", "weight": 50 },
+      { "name": "calculating-volume", "weight": 30 },
+      { "name": "formatting-days", "weight": 10 }
+    ]
   },
   "config": {
     "tier": "balanced",

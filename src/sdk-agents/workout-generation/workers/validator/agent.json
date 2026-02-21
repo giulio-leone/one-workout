@@ -1,11 +1,27 @@
 {
   "id": "validator",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "type": "agent",
   "description": "Validates workout program for quality and consistency",
   "interface": {
     "input": { "$ref": "./schema.ts#ValidatorInputSchema" },
     "output": { "$ref": "./schema.ts#ValidatorOutputSchema" }
+  },
+  "skills": {
+    "path": "skills",
+    "expose": []
+  },
+  "tools": {
+    "source": "registry",
+    "allowlist": []
+  },
+  "progress": {
+    "aiDriven": true,
+    "fallbackSteps": [
+      { "name": "validating-structure", "weight": 40 },
+      { "name": "checking-consistency", "weight": 40 },
+      { "name": "generating-report", "weight": 20 }
+    ]
   },
   "config": {
     "tier": "fast",

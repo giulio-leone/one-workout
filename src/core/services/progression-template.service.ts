@@ -1,6 +1,7 @@
 import { prisma } from '@onecoach/lib-core';
 import type { ProgressionParams } from './workout-progression.service';
 import type { WorkoutTemplateType } from '@onecoach/types';
+import { toPrismaJsonValue, fromPrismaJson } from '@onecoach/lib-shared';
 
 const PROGRESSION_TEMPLATE_TYPE: WorkoutTemplateType = 'week';
 
@@ -22,7 +23,7 @@ export class ProgressionTemplateService {
         name,
         description,
         type: PROGRESSION_TEMPLATE_TYPE,
-        data: params as any, // Store params as JSON
+        data: toPrismaJsonValue(params),
         category: 'progression',
         isPublic: false, // Private by default
       },
@@ -47,7 +48,7 @@ export class ProgressionTemplateService {
       id: t.id,
       name: t.name,
       description: t.description,
-      params: t.data as unknown as ProgressionParams,
+      params: fromPrismaJson<ProgressionParams>(t.data)!,
     }));
   }
 
@@ -80,7 +81,7 @@ export class ProgressionTemplateService {
       id: template.id,
       name: template.name,
       description: template.description,
-      params: template.data as unknown as ProgressionParams,
+      params: fromPrismaJson<ProgressionParams>(template.data)!,
     };
   }
 }

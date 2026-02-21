@@ -1,6 +1,6 @@
 {
   "id": "exercise-generation",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "type": "agent",
   "description": "Generates exercises based on description and criteria",
   "interface": {
@@ -8,6 +8,22 @@
     "output": { "$ref": "./schema.ts#ExerciseGenerationOutputSchema" }
   },
   "mcpServers": {},
+  "skills": {
+    "path": "skills",
+    "expose": []
+  },
+  "tools": {
+    "source": "registry",
+    "allowlist": []
+  },
+  "progress": {
+    "aiDriven": true,
+    "fallbackSteps": [
+      { "name": "parsing-input", "weight": 10 },
+      { "name": "generating-exercises", "weight": 70 },
+      { "name": "formatting-output", "weight": 20 }
+    ]
+  },
   "config": {
     "tier": "balanced",
     "temperature": 1,

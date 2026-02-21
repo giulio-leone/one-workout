@@ -19,7 +19,7 @@ import { userProfileService } from '@onecoach/lib-core/user-profile.service';
 import { prepareProgramForPersistence } from './transformers/program-transform';
 import { normalizeWorkoutProgram } from './normalizers/workout-normalizer';
 import { calculateSetWeights } from './calculators/weight-calculator';
-import { Prisma } from '@prisma/client';
+import { toPrismaJsonValue } from '@onecoach/lib-shared';
 
 import { logger } from '@onecoach/lib-core';
 
@@ -156,7 +156,7 @@ export async function updateProgramWeightsForExerciseId(
         await prisma.workout_programs.update({
           where: { id: program.id },
           data: {
-            weeks: persistence.weeks as unknown as Prisma.InputJsonValue,
+            weeks: toPrismaJsonValue(persistence.weeks as unknown[]),
             updatedAt: new Date(),
           },
         });

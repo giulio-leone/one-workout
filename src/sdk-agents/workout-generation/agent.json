@@ -1,13 +1,32 @@
 {
   "id": "workout-generation",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "type": "agent",
-  "description": "Multi-agent workout program generator using SDK v4.0 with durable execution",
+  "description": "Multi-agent workout program generator using SDK v4.2 with durable execution",
   "interface": {
     "input": { "$ref": "./schema.ts#WorkoutGenerationInputSchema" },
     "output": { "$ref": "./schema.ts#WorkoutGenerationOutputSchema" }
   },
   "mcpServers": {},
+  "skills": {
+    "path": "skills",
+    "expose": []
+  },
+  "tools": {
+    "source": "registry",
+    "allowlist": []
+  },
+  "progress": {
+    "aiDriven": false,
+    "fallbackSteps": [
+      { "name": "parallel-init", "weight": 20 },
+      { "name": "progression-calculator", "weight": 15 },
+      { "name": "day-generator", "weight": 25 },
+      { "name": "merge-exercises", "weight": 5 },
+      { "name": "parallel-post", "weight": 25 },
+      { "name": "assemble-weeks", "weight": 10 }
+    ]
+  },
   "config": {
     "tier": "balanced",
     "temperature": 1,

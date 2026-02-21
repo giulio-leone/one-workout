@@ -51,11 +51,11 @@ export function normalizeWorkoutProgramSummary(
   const createdAtDate =
     program.createdAt instanceof Date
       ? program.createdAt
-      : new Date(program.createdAt as unknown as string | number);
+      : new Date(program.createdAt);
   const updatedAtDate =
     program.updatedAt instanceof Date
       ? program.updatedAt
-      : new Date(program.updatedAt as unknown as string | number);
+      : new Date(program.updatedAt);
 
   return {
     id: program.id,

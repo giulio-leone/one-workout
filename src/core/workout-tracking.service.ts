@@ -23,7 +23,7 @@ import type {
   CreateWorkoutSessionRequest,
   UpdateWorkoutSessionRequest,
   WorkoutProgramStats,
-} from '@giulio-leone/types-workout';
+} from '@giulio-leone/types/workout';
 
 /**
  * Create a new workout session

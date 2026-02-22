@@ -18,64 +18,28 @@
       }
     },
     "./program-transform": {
-      "import": {
-        "types": "./dist/core/transformers/program-transform.d.ts",
-        "default": "./dist/core/transformers/program-transform.js"
-      },
-      "require": {
-        "types": "./dist/core/transformers/program-transform.d.cts",
-        "default": "./dist/core/transformers/program-transform.cjs"
-      }
+      "types": "./src/core/transformers/program-transform.ts",
+      "default": "./src/core/transformers/program-transform.ts"
     },
     "./program-server-transform": {
-      "import": {
-        "types": "./dist/core/transformers/program-server-transform.d.ts",
-        "default": "./dist/core/transformers/program-server-transform.js"
-      },
-      "require": {
-        "types": "./dist/core/transformers/program-server-transform.d.cts",
-        "default": "./dist/core/transformers/program-server-transform.cjs"
-      }
+      "types": "./src/core/transformers/program-server-transform.ts",
+      "default": "./src/core/transformers/program-server-transform.ts"
     },
     "./normalizers/workout-normalizer": {
-      "import": {
-        "types": "./dist/core/normalizers/workout-normalizer.d.ts",
-        "default": "./dist/core/normalizers/workout-normalizer.js"
-      },
-      "require": {
-        "types": "./dist/core/normalizers/workout-normalizer.d.cts",
-        "default": "./dist/core/normalizers/workout-normalizer.cjs"
-      }
+      "types": "./src/core/normalizers/workout-normalizer.ts",
+      "default": "./src/core/normalizers/workout-normalizer.ts"
     },
     "./weight-calculator": {
-      "import": {
-        "types": "./dist/core/calculators/weight-calculator.d.ts",
-        "default": "./dist/core/calculators/weight-calculator.js"
-      },
-      "require": {
-        "types": "./dist/core/calculators/weight-calculator.d.cts",
-        "default": "./dist/core/calculators/weight-calculator.cjs"
-      }
+      "types": "./src/core/calculators/weight-calculator.ts",
+      "default": "./src/core/calculators/weight-calculator.ts"
     },
     "./workout-weight-calculator.service": {
-      "import": {
-        "types": "./dist/core/workout-weight-calculator.service.d.ts",
-        "default": "./dist/core/workout-weight-calculator.service.js"
-      },
-      "require": {
-        "types": "./dist/core/workout-weight-calculator.service.d.cts",
-        "default": "./dist/core/workout-weight-calculator.service.cjs"
-      }
+      "types": "./src/core/workout-weight-calculator.service.ts",
+      "default": "./src/core/workout-weight-calculator.service.ts"
     },
     "./utils/progression-calculator": {
-      "import": {
-        "types": "./dist/core/calculators/progression-calculator.d.ts",
-        "default": "./dist/core/calculators/progression-calculator.js"
-      },
-      "require": {
-        "types": "./dist/core/calculators/progression-calculator.d.cts",
-        "default": "./dist/core/calculators/progression-calculator.cjs"
-      }
+      "types": "./src/core/calculators/progression-calculator.ts",
+      "default": "./src/core/calculators/progression-calculator.ts"
     }
   },
   "files": [
@@ -90,16 +54,15 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@giulio-leone/contracts": "^0.1.0",
-    "@giulio-leone/lib-core": "^0.1.0",
-    "@giulio-leone/lib-exercise": "^0.1.0",
-    "@giulio-leone/lib-import-core": "^0.1.0",
-    "@giulio-leone/lib-metadata": "^0.1.0",
-    "@giulio-leone/lib-shared": "^0.1.0",
-    "@giulio-leone/one-agent": "^0.1.0",
-    "@giulio-leone/schemas": "^0.1.0",
-    "@giulio-leone/types": "^0.1.0",
-    "@giulio-leone/types-workout": "^0.1.0",
+    "@giulio-leone/contracts": "workspace:*",
+    "@giulio-leone/lib-core": "workspace:*",
+    "@giulio-leone/lib-exercise": "workspace:*",
+    "@giulio-leone/lib-import-core": "workspace:*",
+    "@giulio-leone/lib-metadata": "workspace:*",
+    "@giulio-leone/lib-shared": "workspace:*",
+    "@giulio-leone/one-agent": "workspace:*",
+    "@giulio-leone/schemas": "workspace:*",
+    "@giulio-leone/types": "workspace:*",
     "ai": "6.0.77",
     "xlsx": "^0.18.5",
     "zod": "4.3.6"

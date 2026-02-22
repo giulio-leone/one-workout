@@ -8,7 +8,7 @@
  * while enabling the new element-based architecture.
  */
 
-import type { WorkoutDay, WorkoutElement, Exercise, ExerciseElement } from '@onecoach/schemas';
+import type { WorkoutDay, WorkoutElement, Exercise, ExerciseElement } from '@giulio-leone/schemas';
 
 // ============================================================================
 // Legacy to Elements Conversion

@@ -5,7 +5,7 @@
  * Call initializeWorkoutSchemas() before executing workout agents.
  */
 
-import { registerSchemas, registerTools } from '@onecoach/one-agent/framework';
+import { registerSchemas, registerTools } from '@giulio-leone/one-agent/framework';
 
 // ==================== MAIN COORDINATOR SCHEMAS ====================
 

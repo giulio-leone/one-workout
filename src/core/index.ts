@@ -45,7 +45,7 @@ export * from './services/workout-progression.service';
 export * from './services/progression-template.service';
 
 // Schemas & Constants
-export * from '@onecoach/schemas';
+export * from '@giulio-leone/schemas';
 export * from './constants';
 
 // SDK Transforms (for programmatic workflow steps)

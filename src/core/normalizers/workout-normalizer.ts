@@ -9,7 +9,7 @@ import type {
   workout_programs as PrismaWorkoutProgram,
   workout_program_versions as PrismaWorkoutProgramVersion,
 } from '@prisma/client';
-import type { WorkoutDay, WorkoutProgram, WorkoutWeek } from '@onecoach/types';
+import type { WorkoutDay, WorkoutProgram, WorkoutWeek } from '@giulio-leone/types';
 import {
   ensureArray,
   ensureArrayOfStrings,

@@ -1,7 +1,7 @@
-import { prisma } from '@onecoach/lib-core';
+import { prisma } from '@giulio-leone/lib-core';
 import type { ProgressionParams } from './workout-progression.service';
-import type { WorkoutTemplateType } from '@onecoach/types';
-import { toPrismaJsonValue, fromPrismaJson } from '@onecoach/lib-shared';
+import type { WorkoutTemplateType } from '@giulio-leone/types';
+import { toPrismaJsonValue, fromPrismaJson } from '@giulio-leone/lib-shared';
 
 const PROGRESSION_TEMPLATE_TYPE: WorkoutTemplateType = 'week';
 

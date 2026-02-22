@@ -1,5 +1,5 @@
-import { prisma } from '@onecoach/lib-core';
-import { createId, toPrismaJsonValue } from '@onecoach/lib-shared/utils';
+import { prisma } from '@giulio-leone/lib-core';
+import { createId, toPrismaJsonValue } from '@giulio-leone/lib-shared/utils';
 import type {
   WorkoutProgram,
   WorkoutWeek,
@@ -7,7 +7,7 @@ import type {
   Exercise,
   SetGroup,
   ExerciseSet,
-} from '@onecoach/types';
+} from '@giulio-leone/types';
 
 import type {
   ImportFile,
@@ -16,14 +16,14 @@ import type {
   ImportedDay,
   ImportedExercise,
   ImportOptions,
-} from '@onecoach/schemas';
-import { ImportOptionsSchema, IMPORT_LIMITS as WORKOUT_LIMITS } from '@onecoach/schemas';
+} from '@giulio-leone/schemas';
+import { ImportOptionsSchema, IMPORT_LIMITS as WORKOUT_LIMITS } from '@giulio-leone/schemas';
 
 import { FileValidatorService } from './file-validator.service';
 import { FileParserService } from './file-parser.service';
 import { ExerciseMatcherService } from './exercise-matcher.service';
-import type { BaseImportResult, AIParseContext } from '@onecoach/lib-import-core';
-import { BaseImportService } from '@onecoach/lib-import-core';
+import type { BaseImportResult, AIParseContext } from '@giulio-leone/lib-import-core';
+import { BaseImportService } from '@giulio-leone/lib-import-core';
 
 /**
  * Risultato dell'import

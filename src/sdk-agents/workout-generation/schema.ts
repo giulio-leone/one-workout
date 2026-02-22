@@ -6,7 +6,7 @@
  */
 
 import { z } from 'zod';
-import { registerSchemas, ProgressFieldSchema } from '@onecoach/one-agent/framework';
+import { registerSchemas, ProgressFieldSchema } from '@giulio-leone/one-agent/framework';
 
 // ==================== ENUMS ====================
 

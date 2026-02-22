@@ -4,7 +4,7 @@
  * Utility functions per normalizzazione gruppi muscolari
  */
 
-import type { MuscleGroup } from '@onecoach/types';
+import type { MuscleGroup } from '@giulio-leone/types';
 import { ALLOWED_MUSCLE_GROUPS, MUSCLE_GROUP_ALIASES } from '../../constants';
 
 /**

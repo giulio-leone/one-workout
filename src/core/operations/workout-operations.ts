@@ -12,15 +12,15 @@ import type {
   Exercise,
   SetGroup,
   ExerciseSet,
-} from '@onecoach/types';
+} from '@giulio-leone/types';
 import {
   createEmptyWeek,
   createEmptyDay,
   createEmptyExercise,
 } from '../transformers/program-transform';
-import { createId } from '@onecoach/lib-shared';
+import { createId } from '@giulio-leone/lib-shared';
 import { DEFAULT_SET } from '../constants';
-import { kgToLbs } from '@onecoach/lib-shared';
+import { kgToLbs } from '@giulio-leone/lib-shared';
 import {
   getWorkoutProgramWeek,
   getWorkoutProgramDayByWeek,

@@ -12,18 +12,18 @@
  * - Dependency Inversion: Depends on Prisma abstraction
  */
 
-import { prisma } from '@onecoach/lib-core';
-import { createId } from '@onecoach/lib-shared/id-generator';
-import { toPrismaJsonValue } from '@onecoach/lib-shared';
+import { prisma } from '@giulio-leone/lib-core';
+import { createId } from '@giulio-leone/lib-shared/id-generator';
+import { toPrismaJsonValue } from '@giulio-leone/lib-shared';
 import { mapToWorkoutSession, mapToWorkoutSessions } from './mappers/workout-session.mapper';
 import { hydrateSetGroups } from './helpers/utils/set-group-helpers';
-import { logger } from '@onecoach/lib-core';
+import { logger } from '@giulio-leone/lib-core';
 import type {
   WorkoutSession,
   CreateWorkoutSessionRequest,
   UpdateWorkoutSessionRequest,
   WorkoutProgramStats,
-} from '@onecoach/types-workout';
+} from '@giulio-leone/types-workout';
 
 /**
  * Create a new workout session

@@ -2,7 +2,7 @@
  * Progression Diff Generator Schema
  *
  * Genera diff per settimane 2-4 basandosi su Week 1 template.
- * Usa lo schema progressionDiffSchema già definito in @onecoach/schemas.
+ * Usa lo schema progressionDiffSchema già definito in @giulio-leone/schemas.
  */
 
 import { z } from 'zod';
@@ -35,7 +35,7 @@ export type ProgressionDiffGeneratorInput = z.infer<typeof ProgressionDiffGenera
 /**
  * Single change to apply to an exercise
  *
- * NOTE: This replicates progressionChangeSchema from @onecoach/schemas
+ * NOTE: This replicates progressionChangeSchema from @giulio-leone/schemas
  * to avoid import issues with the SDK agent system.
  */
 const ProgressionChangeSchema = z.object({

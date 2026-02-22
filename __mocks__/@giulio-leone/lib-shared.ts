@@ -1,5 +1,5 @@
 /**
- * Mock for @onecoach/lib-shared used in tests.
+ * Mock for @giulio-leone/lib-shared used in tests.
  * Provides only the functions used by one-workout calculators.
  */
 

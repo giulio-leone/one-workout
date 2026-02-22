@@ -11,10 +11,10 @@
  */
 
 import { DifficultyLevel, WorkoutStatus } from '@prisma/client';
-import type { WorkoutProgram } from '@onecoach/types';
-import { createId } from '@onecoach/lib-shared';
+import type { WorkoutProgram } from '@giulio-leone/types';
+import { createId } from '@giulio-leone/lib-shared';
 import { ensureArrayOfStrings, ensureNumber, ensureString } from '../utils';
-import { convertWorkoutGoalNamesToIds } from '@onecoach/lib-metadata';
+import { convertWorkoutGoalNamesToIds } from '@giulio-leone/lib-metadata';
 import {
   normalizeDifficulty,
   normalizeStatus,

@@ -10,8 +10,8 @@
  * - DRY: logica centralizzata qui
  */
 
-import type { SetGroup, ExerciseSet, SetProgression } from '@onecoach/schemas';
-import type { Exercise } from '@onecoach/types';
+import type { SetGroup, ExerciseSet, SetProgression } from '@giulio-leone/schemas';
+import type { Exercise } from '@giulio-leone/types';
 
 /**
  * Genera un ID univoco per SetGroup

@@ -5,8 +5,8 @@
  * Follows SOLID principles: Single Responsibility for mapping logic.
  */
 
-import type { WorkoutSession, Exercise } from '@onecoach/types-workout';
-import { toExerciseArrayTyped } from '@onecoach/lib-shared';
+import type { WorkoutSession, Exercise } from '@giulio-leone/types-workout';
+import { toExerciseArrayTyped } from '@giulio-leone/lib-shared';
 import type { workout_sessions } from '@prisma/client';
 
 /**

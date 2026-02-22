@@ -6,7 +6,7 @@
  */
 
 import { resolve } from 'path';
-import { execute, type ProgressCallback } from '@onecoach/one-agent/framework';
+import { execute, type ProgressCallback } from '@giulio-leone/one-agent/framework';
 import { initializeWorkoutSchemas } from '../registry';
 import type {
   WorkoutGenerationInput,

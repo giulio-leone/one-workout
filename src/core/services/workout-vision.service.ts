@@ -7,8 +7,8 @@
  * @module lib-workout/services/workout-vision
  */
 
-import { parseWithVisionAI } from '@onecoach/lib-import-core';
-import { ImportedWorkoutProgramSchema, type ImportedWorkoutProgram } from '@onecoach/schemas';
+import { parseWithVisionAI } from '@giulio-leone/lib-import-core';
+import { ImportedWorkoutProgramSchema, type ImportedWorkoutProgram } from '@giulio-leone/schemas';
 
 // ==================== PROMPTS ====================
 

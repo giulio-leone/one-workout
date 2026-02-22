@@ -13,7 +13,7 @@
  */
 
 import { z } from 'zod';
-import { registerTransforms } from '@onecoach/one-agent/framework';
+import { registerTransforms } from '@giulio-leone/one-agent/framework';
 import {
   assembleWeeksFromDiffs,
   validateWeeksConsistency,

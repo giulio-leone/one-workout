@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { ImportOptionsSchema } from '@onecoach/schemas';
+import { ImportOptionsSchema } from '@giulio-leone/schemas';
 import { FileParserService } from '../file-parser.service';
 
 describe('FileParserService.parseCSV', () => {

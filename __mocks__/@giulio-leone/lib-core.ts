@@ -1,5 +1,5 @@
 /**
- * Mock for @onecoach/lib-core used in tests.
+ * Mock for @giulio-leone/lib-core used in tests.
  * Provides a no-op logger to avoid transitive prisma/next-auth imports.
  */
 

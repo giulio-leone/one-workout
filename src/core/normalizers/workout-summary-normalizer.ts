@@ -5,7 +5,7 @@
  * NON parsa il campo `weeks` JSON per evitare overhead.
  */
 
-import type { DifficultyLevel, WorkoutStatus } from '@onecoach/types';
+import type { DifficultyLevel, WorkoutStatus } from '@giulio-leone/types';
 import { normalizeDifficulty, normalizeStatus } from './workout-normalizer';
 import { ensureArrayOfStrings, ensureNumber, ensureString } from '../utils/type-helpers';
 

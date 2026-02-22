@@ -5,18 +5,18 @@
  * Segue principi SOLID: Single Responsibility, Open/Closed, DRY
  */
 
-import { prisma } from '@onecoach/lib-core';
+import { prisma } from '@giulio-leone/lib-core';
 import { Prisma } from '@prisma/client';
-import { createId } from '@onecoach/lib-shared/id-generator';
-import { toPrismaJsonValue, fromPrismaJson } from '@onecoach/lib-shared';
-import { logger } from '@onecoach/lib-core';
+import { createId } from '@giulio-leone/lib-shared/id-generator';
+import { toPrismaJsonValue, fromPrismaJson } from '@giulio-leone/lib-shared';
+import { logger } from '@giulio-leone/lib-core';
 import type {
   WorkoutTemplate,
   WorkoutTemplateType,
   Exercise,
   WorkoutDay,
   WorkoutWeek,
-} from '@onecoach/types';
+} from '@giulio-leone/types';
 
 interface ListTemplatesOptions {
   type?: WorkoutTemplateType;

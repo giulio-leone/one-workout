@@ -12,16 +12,16 @@ import type {
   Exercise,
   ExerciseSet,
   SetGroup,
-} from '@onecoach/types';
-import { OneRepMaxService } from '@onecoach/lib-exercise/one-rep-max.service';
-import { prisma } from '@onecoach/lib-core';
-import { userProfileService } from '@onecoach/lib-core/user-profile.service';
+} from '@giulio-leone/types';
+import { OneRepMaxService } from '@giulio-leone/lib-exercise/one-rep-max.service';
+import { prisma } from '@giulio-leone/lib-core';
+import { userProfileService } from '@giulio-leone/lib-core/user-profile.service';
 import { prepareProgramForPersistence } from './transformers/program-transform';
 import { normalizeWorkoutProgram } from './normalizers/workout-normalizer';
 import { calculateSetWeights } from './calculators/weight-calculator';
-import { toPrismaJsonValue } from '@onecoach/lib-shared';
+import { toPrismaJsonValue } from '@giulio-leone/lib-shared';
 
-import { logger } from '@onecoach/lib-core';
+import { logger } from '@giulio-leone/lib-core';
 
 /**
  * Calcola i pesi in un programma basandosi sugli 1RM dell'utente

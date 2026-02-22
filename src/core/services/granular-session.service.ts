@@ -14,15 +14,15 @@
  * @module lib-workout/services/granular-session.service
  */
 
-import type { WorkoutProgram, Exercise, SetGroup, ExerciseSet } from '@onecoach/types';
+import type { WorkoutProgram, Exercise, SetGroup, ExerciseSet } from '@giulio-leone/types';
 import {
   calculateWeightFromIntensity,
   calculateIntensityFromWeight,
 } from '../calculators/intensity-calculator';
-import { kgToLbs, lbsToKg } from '@onecoach/lib-shared';
+import { kgToLbs, lbsToKg } from '@giulio-leone/lib-shared';
 import { generateSetsFromGroup } from '../calculators/progression-calculator';
 import { deepClone } from '../helpers/utils';
-import { createId } from '@onecoach/lib-shared/id-generator';
+import { createId } from '@giulio-leone/lib-shared/id-generator';
 
 // =====================================================
 // Types & Interfaces

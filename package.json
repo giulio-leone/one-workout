@@ -1,38 +1,81 @@
 {
-  "name": "@onecoach/one-workout",
+  "name": "@giulio-leone/one-workout",
   "version": "0.1.0",
   "description": "OneWorkout - Unified Workout Domain for OneCoach",
   "type": "module",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
     },
     "./program-transform": {
-      "types": "./src/core/transformers/program-transform.ts",
-      "default": "./src/core/transformers/program-transform.ts"
+      "import": {
+        "types": "./dist/core/transformers/program-transform.d.ts",
+        "default": "./dist/core/transformers/program-transform.js"
+      },
+      "require": {
+        "types": "./dist/core/transformers/program-transform.d.cts",
+        "default": "./dist/core/transformers/program-transform.cjs"
+      }
     },
     "./program-server-transform": {
-      "types": "./src/core/transformers/program-server-transform.ts",
-      "default": "./src/core/transformers/program-server-transform.ts"
+      "import": {
+        "types": "./dist/core/transformers/program-server-transform.d.ts",
+        "default": "./dist/core/transformers/program-server-transform.js"
+      },
+      "require": {
+        "types": "./dist/core/transformers/program-server-transform.d.cts",
+        "default": "./dist/core/transformers/program-server-transform.cjs"
+      }
     },
     "./normalizers/workout-normalizer": {
-      "types": "./src/core/normalizers/workout-normalizer.ts",
-      "default": "./src/core/normalizers/workout-normalizer.ts"
+      "import": {
+        "types": "./dist/core/normalizers/workout-normalizer.d.ts",
+        "default": "./dist/core/normalizers/workout-normalizer.js"
+      },
+      "require": {
+        "types": "./dist/core/normalizers/workout-normalizer.d.cts",
+        "default": "./dist/core/normalizers/workout-normalizer.cjs"
+      }
     },
     "./weight-calculator": {
-      "types": "./src/core/calculators/weight-calculator.ts",
-      "default": "./src/core/calculators/weight-calculator.ts"
+      "import": {
+        "types": "./dist/core/calculators/weight-calculator.d.ts",
+        "default": "./dist/core/calculators/weight-calculator.js"
+      },
+      "require": {
+        "types": "./dist/core/calculators/weight-calculator.d.cts",
+        "default": "./dist/core/calculators/weight-calculator.cjs"
+      }
     },
     "./workout-weight-calculator.service": {
-      "types": "./src/core/workout-weight-calculator.service.ts",
-      "default": "./src/core/workout-weight-calculator.service.ts"
+      "import": {
+        "types": "./dist/core/workout-weight-calculator.service.d.ts",
+        "default": "./dist/core/workout-weight-calculator.service.js"
+      },
+      "require": {
+        "types": "./dist/core/workout-weight-calculator.service.d.cts",
+        "default": "./dist/core/workout-weight-calculator.service.cjs"
+      }
     },
     "./utils/progression-calculator": {
-      "types": "./src/core/calculators/progression-calculator.ts",
-      "default": "./src/core/calculators/progression-calculator.ts"
+      "import": {
+        "types": "./dist/core/calculators/progression-calculator.d.ts",
+        "default": "./dist/core/calculators/progression-calculator.js"
+      },
+      "require": {
+        "types": "./dist/core/calculators/progression-calculator.d.cts",
+        "default": "./dist/core/calculators/progression-calculator.cjs"
+      }
     }
   },
   "files": [
@@ -47,33 +90,32 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@onecoach/constants": "workspace:*",
-    "@onecoach/contracts": "workspace:*",
-    "@onecoach/lib-core": "workspace:*",
-    "@onecoach/lib-import-core": "workspace:*",
-    "@onecoach/lib-shared": "workspace:*",
-    "@onecoach/one-agent": "workspace:*",
-    "@onecoach/schemas": "workspace:*",
-    "@onecoach/types": "workspace:*",
-    "@onecoach/types-ai": "workspace:*",
-    "@onecoach/types-analytics": "workspace:*",
-    "@onecoach/types-chat": "workspace:*",
-    "@onecoach/types-core": "workspace:*",
-    "@onecoach/types-database": "workspace:*",
-    "@onecoach/types-domain": "workspace:*",
-    "@onecoach/types-nutrition": "workspace:*",
-    "@onecoach/types-ui": "workspace:*",
-    "@onecoach/types-workout": "workspace:*",
-    "@prisma/client": "^7.2.0",
+    "@giulio-leone/contracts": "workspace:*",
+    "@giulio-leone/lib-core": "workspace:*",
+    "@giulio-leone/lib-exercise": "workspace:*",
+    "@giulio-leone/lib-import-core": "workspace:*",
+    "@giulio-leone/lib-metadata": "workspace:*",
+    "@giulio-leone/lib-shared": "workspace:*",
+    "@giulio-leone/one-agent": "workspace:*",
+    "@giulio-leone/schemas": "workspace:*",
+    "@giulio-leone/types": "workspace:*",
+    "@giulio-leone/types-workout": "workspace:*",
     "ai": "6.0.77",
     "xlsx": "^0.18.5",
     "zod": "4.3.6"
+  },
+  "peerDependencies": {
+    "@prisma/client": ">=5.0.0"
   },
   "devDependencies": {
     "@types/node": "^25.0.3",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "vitest": "^4.0.16"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
   },
   "sideEffects": false
 }

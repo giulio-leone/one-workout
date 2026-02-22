@@ -7,8 +7,8 @@
  * @module lib-workout/services/file-validator
  */
 
-import type { ImportFile } from '@onecoach/schemas';
-import { IMPORT_LIMITS } from '@onecoach/schemas';
+import type { ImportFile } from '@giulio-leone/schemas';
+import { IMPORT_LIMITS } from '@giulio-leone/schemas';
 
 /**
  * Risultato della validazione

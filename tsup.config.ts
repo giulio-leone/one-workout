@@ -1,11 +1,26 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  entry: ['src/index.ts'],
-  format: ['esm'],
+  entry: {
+    index: 'src/index.ts',
+    'core/transformers/program-transform': 'src/core/transformers/program-transform.ts',
+    'core/transformers/program-server-transform': 'src/core/transformers/program-server-transform.ts',
+    'core/normalizers/workout-normalizer': 'src/core/normalizers/workout-normalizer.ts',
+    'core/calculators/weight-calculator': 'src/core/calculators/weight-calculator.ts',
+    'core/workout-weight-calculator.service': 'src/core/workout-weight-calculator.service.ts',
+    'core/calculators/progression-calculator': 'src/core/calculators/progression-calculator.ts',
+  },
+  format: ['esm', 'cjs'],
   dts: true,
   splitting: false,
   sourcemap: true,
   clean: true,
   treeshake: true,
+  external: [
+    /^@giulio-leone\/.*/,
+    '@prisma/client',
+    'ai',
+    'xlsx',
+    'zod',
+  ],
 });

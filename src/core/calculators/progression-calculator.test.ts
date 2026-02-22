@@ -5,7 +5,7 @@ import {
   calculateGroupSummary,
   isUniformGroup,
 } from './progression-calculator';
-import type { ExerciseSet, SetProgression, SetGroup } from '@onecoach/types';
+import type { ExerciseSet, SetProgression, SetGroup } from '@giulio-leone/types';
 
 function makeSet(overrides: Partial<ExerciseSet> = {}): ExerciseSet {
   return {

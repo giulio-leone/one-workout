@@ -6,8 +6,8 @@
  *
  * @module lib-workout/services/file-parser
  */
-import { logger } from '@onecoach/lib-core';
-import type { AIParseContext } from '@onecoach/lib-import-core';
+import { logger } from '@giulio-leone/lib-core';
+import type { AIParseContext } from '@giulio-leone/lib-import-core';
 
 import {
   ImportedWorkoutProgramSchema,
@@ -17,7 +17,7 @@ import {
   type ImportedDay,
   type ImportedExercise,
   type ImportOptions,
-} from '@onecoach/schemas';
+} from '@giulio-leone/schemas';
 
 // Interfaccia per XLSX (caricato dinamicamente)
 interface XLSXModule {

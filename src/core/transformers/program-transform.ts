@@ -6,11 +6,11 @@ import type {
   WorkoutWeek,
   ExerciseSet,
   SetGroup,
-} from '@onecoach/types';
-import { createId } from '@onecoach/lib-shared';
+} from '@giulio-leone/types';
+import { createId } from '@giulio-leone/lib-shared';
 import { DEFAULT_SET } from '../constants';
 import { ensureArrayOfStrings, ensureNumber, ensureString } from '../utils/type-helpers';
-import { syncWeightUnits } from '@onecoach/lib-shared';
+import { syncWeightUnits } from '@giulio-leone/lib-shared';
 import {
   normalizeDifficulty,
   normalizeStatus,

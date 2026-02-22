@@ -14,10 +14,10 @@
  * @module lib-workout/services/exercise-matcher
  */
 
-import { prisma } from '@onecoach/lib-core';
-import { SimpleCache } from '@onecoach/lib-shared';
-import { createId } from '@onecoach/lib-shared/utils';
-import type { ImportedExercise } from '@onecoach/schemas';
+import { prisma } from '@giulio-leone/lib-core';
+import { SimpleCache } from '@giulio-leone/lib-shared';
+import { createId } from '@giulio-leone/lib-shared/utils';
+import type { ImportedExercise } from '@giulio-leone/schemas';
 
 // ==================== TYPES ====================
 

@@ -4,7 +4,7 @@
  * Utility per calcolare progressioni nei gruppi di serie
  */
 
-import type { ExerciseSet, SetProgression, SetGroup } from '@onecoach/types';
+import type { ExerciseSet, SetProgression, SetGroup } from '@giulio-leone/types';
 
 interface ProgressionStep {
   fromSet: number;

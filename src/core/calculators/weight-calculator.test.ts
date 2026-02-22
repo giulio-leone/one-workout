@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { calculateSetWeights } from './weight-calculator';
-import type { ExerciseSet } from '@onecoach/types';
+import type { ExerciseSet } from '@giulio-leone/types';
 
 function makeSet(overrides: Partial<ExerciseSet> = {}): ExerciseSet {
   return {

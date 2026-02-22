@@ -5,9 +5,9 @@
  * This file contains no database or external service calls.
  */
 
-import type { ExerciseSet } from '@onecoach/types';
+import type { ExerciseSet } from '@giulio-leone/types';
 import { calculateWeightFromIntensity, calculateIntensityFromWeight } from './intensity-calculator';
-import { kgToLbs } from '@onecoach/lib-shared';
+import { kgToLbs } from '@giulio-leone/lib-shared';
 import { roundToPlateIncrement } from '../utils';
 
 /**

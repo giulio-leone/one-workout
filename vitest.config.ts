@@ -9,8 +9,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@onecoach/lib-shared': path.resolve(__dirname, '__mocks__/@onecoach/lib-shared.ts'),
-      '@onecoach/lib-core': path.resolve(__dirname, '__mocks__/@onecoach/lib-core.ts'),
+      '@giulio-leone/lib-shared': path.resolve(__dirname, '__mocks__/@giulio-leone/lib-shared.ts'),
+      '@giulio-leone/lib-core': path.resolve(__dirname, '__mocks__/@giulio-leone/lib-core.ts'),
     },
   },
 });

@@ -5,11 +5,11 @@
  * Implementa IWorkoutService contract
  */
 
-import { createId, getCurrentTimestamp, storageService } from '@onecoach/lib-shared';
-import type { IStorageService } from '@onecoach/lib-shared';
-import type { WorkoutProgram } from '@onecoach/types';
-import type { ApiResponse } from '@onecoach/types'; // Or from api.types
-import type { IWorkoutService } from '@onecoach/contracts';
+import { createId, getCurrentTimestamp, storageService } from '@giulio-leone/lib-shared';
+import type { IStorageService } from '@giulio-leone/lib-shared';
+import type { WorkoutProgram } from '@giulio-leone/types';
+import type { ApiResponse } from '@giulio-leone/types'; // Or from api.types
+import type { IWorkoutService } from '@giulio-leone/contracts';
 
 /**
  * Storage key per workouts

@@ -8,8 +8,8 @@
  * - id: ID temporaneo dell'istanza dell'esercizio nel workout
  */
 
-import type { Exercise, SetGroup, LocalizedExercise } from '@onecoach/types';
-import { createId } from '@onecoach/lib-shared';
+import type { Exercise, SetGroup, LocalizedExercise } from '@giulio-leone/types';
+import { createId } from '@giulio-leone/lib-shared';
 import { getMuscleGroupFromName } from './utils/muscle-group';
 import { DEFAULT_SET } from '../constants';
 

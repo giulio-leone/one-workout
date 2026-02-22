@@ -1,7 +1,7 @@
 /**
  * Utility pure per calcoli di intensità, peso e 1RM
  */
-import { kgToLbs } from '@onecoach/lib-shared';
+import { kgToLbs } from '@giulio-leone/lib-shared';
 import { roundToPlateIncrement } from '../utils';
 
 // =====================================================
@@ -200,7 +200,7 @@ export function estimateOneRMFromReps(reps: number, weight: number, rpe: number 
   return weight * (1 + effectiveReps / 30);
 }
 
-// Note: kgToLbs and lbsToKg are now imported from @onecoach/lib-shared
+// Note: kgToLbs and lbsToKg are now imported from @giulio-leone/lib-shared
 
 // =====================================================
 // Sync Helpers

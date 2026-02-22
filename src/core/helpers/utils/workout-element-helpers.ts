@@ -14,7 +14,7 @@ import type {
   Circuit,
   WorkoutElement,
   SetGroup,
-} from '@onecoach/schemas';
+} from '@giulio-leone/schemas';
 
 /**
  * Minimal interface for exercise calculations.

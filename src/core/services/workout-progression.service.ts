@@ -1,9 +1,9 @@
-import type { WorkoutProgram, Exercise, ExerciseSet, SetGroup } from '@onecoach/types';
+import type { WorkoutProgram, Exercise, ExerciseSet, SetGroup } from '@giulio-leone/types';
 import {
   calculateWeightFromIntensity,
   calculateIntensityFromWeight,
 } from '../calculators/intensity-calculator';
-import { kgToLbs } from '@onecoach/lib-shared';
+import { kgToLbs } from '@giulio-leone/lib-shared';
 import { deepClone } from '../helpers/utils';
 
 export type ProgressionType =

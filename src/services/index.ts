@@ -34,12 +34,9 @@ export * from './workout-generation-prompts';
 export * from './workout-generation-stream.service';
 export * from './workout-generation-utils';
 export * from './workout-normalization.service';
-export * from './workout-template.service';
-export * from './workout-tracking.service';
 export * from './program-builder';
 export * from './exercise-normalizer';
 
 // Workout agent utils
-export * from './agents/utils/exercise-matcher';
 export * from './agents/utils/sdk-input-builder';
 export * from './agents/utils/data-service';

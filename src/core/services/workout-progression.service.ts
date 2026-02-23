@@ -110,7 +110,7 @@ export class WorkoutProgressionService {
 
     if (!oneRepMax || oneRepMax <= 0) return newOcc;
 
-    newOcc.exercise.setGroups.forEach((group: any) => {
+    newOcc.exercise.setGroups.forEach((group: SetGroup) => {
       // Helper interno per sync singolo set
       const syncSet = (s: ExerciseSet) => {
         if (s.intensityPercent && s.intensityPercent > 0) {
@@ -165,12 +165,12 @@ export class WorkoutProgressionService {
       const currentValue = params.startValue + delta;
 
       // Applica a tutti i SetGroups dell'esercizio
-      occ.exercise.setGroups.forEach((group: any) => {
+      occ.exercise.setGroups.forEach((group: SetGroup) => {
         if (params.type === 'linear_sets') {
           this.resizeSetGroup(group, currentValue);
         } else {
           this.updateSet(group.baseSet, params.type, currentValue, oneRepMax);
-          group.sets.forEach((set: any) => {
+          group.sets.forEach((set: ExerciseSet) => {
             this.updateSet(set, params.type, currentValue, oneRepMax);
           });
         }
@@ -181,7 +181,7 @@ export class WorkoutProgressionService {
 
     // Se 1RM è fornito, facciamo un passaggio finale di sync per assicurare coerenza
     if (oneRepMax) {
-      updatedOccurrences = updatedOccurrences.map((occ: any) =>
+      updatedOccurrences = updatedOccurrences.map((occ: ExerciseOccurrence) =>
         this.syncOccurrenceWithOneRepMax(occ, oneRepMax)
       );
     }
@@ -313,7 +313,7 @@ export class WorkoutProgressionService {
   static applyToProgram(program: WorkoutProgram, updates: ExerciseOccurrence[]): WorkoutProgram {
     const newProgram = deepClone(program);
 
-    updates.forEach((update: any) => {
+    updates.forEach((update: ExerciseOccurrence) => {
       const { weekIndex, dayIndex, exerciseIndex, exercise } = update;
 
       if (

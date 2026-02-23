@@ -356,7 +356,10 @@ export class WorkoutImportService extends BaseImportService<
     };
   }
 
-  protected async persist(processed: ParsedWorkoutData, userId: string): Promise<Partial<WorkoutImportResult>> {
+  protected async persist(
+    processed: ParsedWorkoutData,
+    userId: string
+  ): Promise<Partial<WorkoutImportResult>> {
     if (processed.needsReview) {
       const reviewResult = processed.parseResult;
       // Return review result without persisting
@@ -368,7 +371,8 @@ export class WorkoutImportService extends BaseImportService<
         stats: reviewResult
           ? {
               filesProcessed: reviewResult.stats.filesProcessed,
-              exercisesTotal: reviewResult.stats.matchedExercises + reviewResult.stats.unmatchedExercises,
+              exercisesTotal:
+                reviewResult.stats.matchedExercises + reviewResult.stats.unmatchedExercises,
               exercisesMatched: reviewResult.stats.matchedExercises,
               exercisesCreated: 0,
               weeksImported: 0,

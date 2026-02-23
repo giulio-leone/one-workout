@@ -243,7 +243,7 @@ export class WorkoutVisionService {
       contentBase64: imageBase64,
       mimeType,
       prompt: IMAGE_EXTRACTION_PROMPT,
-      schema: ImportedWorkoutProgramSchema as any,
+      schema: ImportedWorkoutProgramSchema as never, // Zod version mismatch between packages
       userId,
       fileType: 'image',
     });
@@ -257,7 +257,7 @@ export class WorkoutVisionService {
       contentBase64: pdfBase64,
       mimeType: 'application/pdf',
       prompt: PDF_EXTRACTION_PROMPT,
-      schema: ImportedWorkoutProgramSchema as any,
+      schema: ImportedWorkoutProgramSchema as never, // Zod version mismatch between packages
       userId,
       fileType: 'pdf',
     });
@@ -275,7 +275,7 @@ export class WorkoutVisionService {
       contentBase64: documentBase64,
       mimeType,
       prompt: DOCUMENT_EXTRACTION_PROMPT,
-      schema: ImportedWorkoutProgramSchema as any,
+      schema: ImportedWorkoutProgramSchema as never, // Zod version mismatch between packages
       userId,
       fileType: 'document',
     });
@@ -293,7 +293,7 @@ export class WorkoutVisionService {
       contentBase64,
       mimeType,
       prompt: SPREADSHEET_EXTRACTION_PROMPT,
-      schema: ImportedWorkoutProgramSchema as any,
+      schema: ImportedWorkoutProgramSchema as never, // Zod version mismatch between packages
       userId,
       fileType: 'spreadsheet',
     });

@@ -49,13 +49,9 @@ export function normalizeWorkoutProgramSummary(
   program: PrismaWorkoutProgramSummary
 ): WorkoutProgramSummary {
   const createdAtDate =
-    program.createdAt instanceof Date
-      ? program.createdAt
-      : new Date(program.createdAt);
+    program.createdAt instanceof Date ? program.createdAt : new Date(program.createdAt);
   const updatedAtDate =
-    program.updatedAt instanceof Date
-      ? program.updatedAt
-      : new Date(program.updatedAt);
+    program.updatedAt instanceof Date ? program.updatedAt : new Date(program.updatedAt);
 
   return {
     id: program.id,

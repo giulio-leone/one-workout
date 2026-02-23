@@ -44,7 +44,7 @@ export class ProgressionTemplateService {
       },
     });
 
-    return templates.map((t: any) => ({
+    return templates.map((t) => ({
       id: t.id,
       name: t.name,
       description: t.description,

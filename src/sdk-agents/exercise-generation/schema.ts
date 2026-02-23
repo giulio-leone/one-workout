@@ -5,7 +5,10 @@ import { z } from 'zod';
 export const ExerciseGenerationInputSchema = z.object({
   count: z.number().default(5),
   description: z.string(),
-  existingNames: z.array(z.string()).optional().describe('List of existing exercise names/slugs to avoid'),
+  existingNames: z
+    .array(z.string())
+    .optional()
+    .describe('List of existing exercise names/slugs to avoid'),
   muscleGroups: z.array(z.string()).optional(),
   bodyPartIds: z.array(z.string()).optional(),
 });
@@ -16,10 +19,12 @@ export const GeneratedExerciseSchema = z.object({
   name: z.string(),
   description: z.string(),
   typeId: z.string(),
-  muscleIds: z.array(z.object({
-    id: z.string(),
-    role: z.enum(['PRIMARY', 'SECONDARY']),
-  })),
+  muscleIds: z.array(
+    z.object({
+      id: z.string(),
+      role: z.enum(['PRIMARY', 'SECONDARY']),
+    })
+  ),
   bodyPartIds: z.array(z.string()),
   equipmentIds: z.array(z.string()).optional(),
   instructions: z.array(z.string()),

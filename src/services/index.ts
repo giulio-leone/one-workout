@@ -19,3 +19,27 @@ export {
   initializeExerciseGeneration,
   type ExerciseGenerationResult,
 } from './exercise-generation.service';
+
+// One Rep Max
+export { OneRepMaxService } from './one-rep-max.service';
+
+// Weight Calculator
+export { calculateWeightsInProgram } from './workout-weight-calculator.service';
+
+// Workout generation pipeline
+export * from './workout-generation-persistence.service';
+export * from './workout-generation-mapper';
+export * from './workout-generation-config.service';
+export * from './workout-generation-prompts';
+export * from './workout-generation-stream.service';
+export * from './workout-generation-utils';
+export * from './workout-normalization.service';
+export * from './workout-template.service';
+export * from './workout-tracking.service';
+export * from './program-builder';
+export * from './exercise-normalizer';
+
+// Workout agent utils
+export * from './agents/utils/exercise-matcher';
+export * from './agents/utils/sdk-input-builder';
+export * from './agents/utils/data-service';

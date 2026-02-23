@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { normalizeDifficulty, normalizeStatus, normalizeDay, normalizeWeek } from './workout-normalizer';
+import {
+  normalizeDifficulty,
+  normalizeStatus,
+  normalizeDay,
+  normalizeWeek,
+} from './workout-normalizer';
 
 // =============================================================================
 // normalizeDifficulty

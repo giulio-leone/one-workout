@@ -109,7 +109,7 @@ function applyProgressionToSet(
  * @returns SetGroup[] con sets[] popolati
  */
 export function hydrateSetGroups(setGroups: SetGroup[]): SetGroup[] {
-  return setGroups.map((group: any) => ({
+  return setGroups.map((group: SetGroup) => ({
     ...group,
     sets:
       group.sets && group.sets.length > 0
@@ -127,7 +127,7 @@ export function hydrateSetGroups(setGroups: SetGroup[]): SetGroup[] {
  *
  * @example
  * const allSets = getExpandedSets(exercise.setGroups);
- * const totalVolume = allSets.reduce((sum: any, set: any) => sum + (set.reps * set.weight), 0);
+ * const totalVolume = allSets.reduce((sum: number, set: ExerciseSet) => sum + (set.reps * set.weight), 0);
  */
 export function getExpandedSets(setGroups: SetGroup[]): ExerciseSet[] {
   const hydratedGroups = hydrateSetGroups(setGroups);
@@ -210,7 +210,7 @@ export function calculateSetGroupVolume(setGroup: SetGroup): number {
       ? setGroup.sets
       : expandSetsFromGroup(setGroup.baseSet, setGroup.count, setGroup.progression);
 
-  return sets.reduce((total: any, set: any) => {
+  return sets.reduce((total: number, set: ExerciseSet) => {
     const reps = set.reps ?? 0;
     const weight = set.weight ?? 0;
     return total + reps * weight;
@@ -226,7 +226,7 @@ export function calculateExerciseVolume(exercise: Exercise): number {
   }
 
   return exercise.setGroups.reduce(
-    (total: any, group: any) => total + calculateSetGroupVolume(group),
+    (total: number, group: SetGroup) => total + calculateSetGroupVolume(group),
     0
   );
 }
@@ -239,7 +239,7 @@ export function countExerciseSets(exercise: Exercise): number {
     return 0;
   }
 
-  return exercise.setGroups.reduce((total: any, group: any) => total + group.count, 0);
+  return exercise.setGroups.reduce((total: number, group: SetGroup) => total + group.count, 0);
 }
 
 /**

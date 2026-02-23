@@ -1,27 +1,25 @@
-/**
- * Exercise Normalizer
- *
- * Funzioni per normalizzare dati esercizi da formati vari (JSON, AI, etc.)
- */
-
-import type {
-  Exercise,
-  ExerciseSet,
-  MuscleGroup,
-  SetGroup,
-  SetProgression,
-} from '@giulio-leone/types';
-import { DEFAULT_SET, ALLOWED_CATEGORIES } from '../constants';
+import { DEFAULT_SET, ALLOWED_CATEGORIES, generateSetGroupId } from '@giulio-leone/one-workout';
 import {
   ensureArray,
   ensureArrayOfStrings,
   ensureNumber,
   ensureString,
   parseFirstNumber,
-} from '../utils/type-helpers';
-import { getMuscleGroupFromName } from '../helpers/utils/muscle-group';
-import { createId } from '@giulio-leone/lib-shared';
+} from '@giulio-leone/one-workout/core/utils/type-helpers';
+import { getMuscleGroupFromName } from '@giulio-leone/one-workout/core/helpers/utils/muscle-group';
 import { kgToLbs, lbsToKg } from '@giulio-leone/lib-shared';
+import type {
+  Exercise,
+  ExerciseSet,
+  MuscleGroup,
+  SetGroup,
+  SetProgression,
+} from '@giulio-leone/types/workout';
+
+// Helper per generare ID se mancante
+function generateId(base: string): string {
+  return `${base}_${Math.random().toString(36).substring(2, 9)}`;
+}
 
 type RawJson = Record<string, unknown>;
 
@@ -31,7 +29,7 @@ type RawJson = Record<string, unknown>;
 export function normalizeMuscleGroups(value: unknown): Exercise['muscleGroups'] {
   const rawGroups = ensureArrayOfStrings(value).map((group: string) => group.toLowerCase());
   const filtered = rawGroups
-    .map((group: string) => getMuscleGroupFromName(group))
+    .map((group) => getMuscleGroupFromName(group))
     .filter((group): group is MuscleGroup => group !== null);
   return filtered.length > 0 ? filtered : [];
 }
@@ -58,7 +56,7 @@ export function normalizeExerciseSets(value: unknown): ExerciseSet[] {
   }
 
   const sets = value
-    .map((entry: unknown) => {
+    .map((entry) => {
       if (!entry || typeof entry !== 'object') {
         return { ...DEFAULT_SET };
       }
@@ -83,50 +81,37 @@ export function normalizeExerciseSets(value: unknown): ExerciseSet[] {
             ? ensureNumber(raw.load)
             : undefined;
 
-      // Supporto nuovi campi: intensityPercent, rpe, weightLbs e ranges
+      // Supporto nuovi campi: intensityPercent, rpe, weightLbs
       const intensityPercent =
         raw.intensityPercent !== undefined ? ensureNumber(raw.intensityPercent) : undefined;
-      const intensityPercentMax =
-        raw.intensityPercentMax !== undefined ? ensureNumber(raw.intensityPercentMax) : undefined;
       const rpe = raw.rpe !== undefined ? ensureNumber(raw.rpe) : undefined;
-      const rpeMax = raw.rpeMax !== undefined ? ensureNumber(raw.rpeMax) : undefined;
-      const repsMax = raw.repsMax !== undefined ? ensureNumber(raw.repsMax) : undefined;
-      const weightMax = raw.weightMax !== undefined ? ensureNumber(raw.weightMax) : undefined;
       let weightLbs = raw.weightLbs !== undefined ? ensureNumber(raw.weightLbs) : undefined;
 
       // Sincronizza sempre kg e lbs: se manca weightLbs ma c'è weight, calcolalo
-      if (weight && !weightLbs) {
+      if (weight !== undefined && weight !== null && weight >= 0 && !weightLbs) {
         weightLbs = kgToLbs(weight);
       } else if (weightLbs && !weight) {
         // Se abbiamo solo lbs, convertiamo in kg (caso raro ma possibile)
         const calculatedWeight = lbsToKg(weightLbs);
         return {
           reps,
-          repsMax,
           duration: duration || undefined,
           weight: calculatedWeight,
-          weightMax,
           weightLbs: weightLbs,
           rest,
           intensityPercent,
-          intensityPercentMax,
           rpe,
-          rpeMax,
         } as ExerciseSet;
       }
 
       return {
         reps,
-        repsMax,
         duration: duration || undefined,
         weight: weight ?? null,
-        weightMax,
         weightLbs: weightLbs ?? null,
         rest,
         intensityPercent: intensityPercent ?? null,
-        intensityPercentMax,
         rpe: rpe ?? null,
-        rpeMax,
       } as ExerciseSet;
     })
     .filter(Boolean);
@@ -145,7 +130,7 @@ export function normalizeSetProgression(raw: unknown): SetProgression | undefine
   if (type !== 'linear' && type !== 'percentage' && type !== 'rpe') return undefined;
 
   const steps = ensureArray(progression.steps)
-    .map((step: unknown) => {
+    .map((step) => {
       if (!step || typeof step !== 'object') return null;
       const s = step as RawJson;
       return {
@@ -166,12 +151,13 @@ export function normalizeSetProgression(raw: unknown): SetProgression | undefine
 
 /**
  * Normalizza un gruppo di serie
+ * SSOT: Usa generateSetGroupId per ID coerenti
  */
 export function normalizeSetGroup(raw: unknown): SetGroup | null {
   if (!raw || typeof raw !== 'object') return null;
 
   const group = raw as RawJson;
-  const id = typeof group.id === 'string' ? group.id : createId();
+  const id = typeof group.id === 'string' ? group.id : generateSetGroupId();
   const count = ensureNumber(group.count, 1);
   const baseSet = normalizeExerciseSets([group.baseSet])[0] || { ...DEFAULT_SET };
   const progression = normalizeSetProgression(group.progression);
@@ -196,21 +182,23 @@ export function normalizeSetGroup(raw: unknown): SetGroup | null {
 
 /**
  * Normalizza un esercizio completo
+ * SSOT: Genera sempre setGroups, mai sets flat
  * Se exerciseId è presente, viene preservato per risoluzione futura nel frontend
  */
 export function normalizeExercise(
   rawExercise: unknown,
-  _dayNumber: number,
+  dayNumber: number,
   index: number
 ): Exercise {
   const raw =
     rawExercise && typeof rawExercise === 'object' ? (rawExercise as RawJson) : ({} as RawJson);
 
-  const id = typeof raw.id === 'string' && raw.id.length > 0 ? raw.id : createId();
+  const baseId = `exercise_${dayNumber}_${index + 1}`;
+  const id = typeof raw.id === 'string' && raw.id.length > 0 ? raw.id : generateId(baseId);
 
-  // Il nome viene da raw.name o exerciseName (AI output) o risolto dal frontend se exerciseId è presente
+  // Il nome viene da raw.name o risolto dal frontend se exerciseId è presente
   const name = ensureString(
-    raw.name ?? raw.exerciseName ?? raw.title ?? raw.exercise ?? `Esercizio ${index + 1}`,
+    raw.name ?? raw.title ?? raw.exercise ?? `Esercizio ${index + 1}`,
     `Esercizio ${index + 1}`
   );
   const description = ensureString(raw.description ?? raw.summary ?? raw.notes ?? '');
@@ -237,9 +225,7 @@ export function normalizeExercise(
 
   const ensureMuscleGroups = (value: unknown): MuscleGroup[] => {
     if (Array.isArray(value)) {
-      const groups = value
-        .map((entry: unknown) => normalizeMuscleGroupLabel(entry))
-        .filter(Boolean);
+      const groups = value.map((entry) => normalizeMuscleGroupLabel(entry)).filter(Boolean);
       return groups.length > 0 ? groups : ['full-body'];
     }
     if (typeof value === 'string') {
@@ -250,69 +236,69 @@ export function normalizeExercise(
   };
 
   const rawReps = raw.reps ?? raw.repRange ?? raw.repetitions;
-  // Support restSeconds from AI output, and rest/restPeriod/recovery as fallbacks
-  const rawRest = raw.restSeconds ?? raw.rest ?? raw.restPeriod ?? raw.recovery;
+  const rawRest = raw.rest ?? raw.restPeriod ?? raw.recovery;
   const rawSets = raw.sets ?? raw.series ?? raw.scheme;
 
-  // Parse rest seconds from exercise-level field (AI outputs restSeconds as number)
   const restSeconds = parseFirstNumber(rawRest) ?? DEFAULT_SET.rest;
   const repsNumber = parseFirstNumber(rawReps);
 
-  // Parse range values from AI output (repsMax, weightMax, rpeMax, intensityPercentMax)
-  const repsMaxNumber = parseFirstNumber(raw.repsMax);
-  const rawWeight = parseFirstNumber(raw.weight);
-  const rawWeightMax = parseFirstNumber(raw.weightMax);
-  const rawRpe = parseFirstNumber(raw.rpe);
-  const rawRpeMax = parseFirstNumber(raw.rpeMax);
-  const rawIntensityPercent = parseFirstNumber(raw.intensityPercent);
-  const rawIntensityPercentMax = parseFirstNumber(raw.intensityPercentMax);
+  // SSOT: Normalizza sempre a setGroups
+  let setGroups: SetGroup[] = [];
 
-  let sets: ExerciseSet[] = [];
-  if (Array.isArray(rawSets)) {
-    sets = normalizeExerciseSets(rawSets).map((set: ExerciseSet) => {
-      // Sincronizza sempre kg e lbs quando normalizziamo
-      const weight = set.weight ?? rawWeight ?? null;
-      const syncedWeight =
-        weight && !set.weightLbs
-          ? { weight, weightLbs: kgToLbs(weight) }
-          : set.weightLbs && !weight
-            ? { weight: lbsToKg(set.weightLbs), weightLbs: set.weightLbs }
-            : { weight, weightLbs: set.weightLbs };
+  // Prima controlla se ci sono già setGroups definiti
+  if (raw.setGroups && Array.isArray(raw.setGroups) && raw.setGroups.length > 0) {
+    const groups = raw.setGroups
+      .map((g) => normalizeSetGroup(g))
+      .filter((g): g is SetGroup => g !== null);
+    if (groups.length > 0) {
+      setGroups = groups;
+    }
+  }
 
-      return {
-        reps: set.reps ?? repsNumber,
-        repsMax: set.repsMax ?? repsMaxNumber,
-        duration: set.duration,
-        weight: syncedWeight.weight,
-        weightMax: set.weightMax ?? rawWeightMax,
-        weightLbs: syncedWeight.weightLbs,
-        rest: set.rest ?? restSeconds,
-        intensityPercent: set.intensityPercent ?? rawIntensityPercent ?? null,
-        intensityPercentMax: set.intensityPercentMax ?? rawIntensityPercentMax,
-        rpe: set.rpe ?? rawRpe ?? null,
-        rpeMax: set.rpeMax ?? rawRpeMax,
-      };
-    });
-  } else if (typeof rawSets === 'number' && Number.isFinite(rawSets) && rawSets > 0) {
-    // Se sets è un numero, crea array di sets con valori default
-    // This handles AI output where sets is a count, not an array
-    const weight = rawWeight ?? null;
-    const weightLbs = weight ? kgToLbs(weight) : null;
+  // Se non ci sono setGroups, crea da sets legacy o default
+  if (setGroups.length === 0) {
+    let normalizedSets: ExerciseSet[] = [];
 
-    sets = Array.from({ length: Math.max(1, Math.floor(rawSets)) }, () => ({
-      reps: repsNumber,
-      repsMax: repsMaxNumber,
-      rest: restSeconds,
-      weight,
-      weightMax: rawWeightMax,
-      weightLbs,
-      intensityPercent: rawIntensityPercent ?? null,
-      intensityPercentMax: rawIntensityPercentMax,
-      rpe: rawRpe ?? null,
-      rpeMax: rawRpeMax,
-    }));
-  } else {
-    sets = [{ ...DEFAULT_SET }];
+    if (Array.isArray(rawSets)) {
+      normalizedSets = normalizeExerciseSets(rawSets).map((set: ExerciseSet) => {
+        // Sincronizza sempre kg e lbs quando normalizziamo
+        const syncedWeight =
+          set.weight !== undefined && set.weight !== null && set.weight >= 0 && !set.weightLbs
+            ? { weight: set.weight, weightLbs: kgToLbs(set.weight) }
+            : set.weightLbs !== undefined &&
+                set.weightLbs !== null &&
+                set.weightLbs >= 0 &&
+                !set.weight
+              ? { weight: lbsToKg(set.weightLbs), weightLbs: set.weightLbs }
+              : { weight: set.weight ?? null, weightLbs: set.weightLbs ?? null };
+
+        return {
+          reps: set.reps ?? repsNumber,
+          duration: set.duration,
+          weight: syncedWeight.weight ?? null,
+          weightLbs: syncedWeight.weightLbs ?? null,
+          rest: set.rest ?? restSeconds,
+          intensityPercent: set.intensityPercent ?? null,
+          rpe: set.rpe ?? null,
+        };
+      });
+    }
+
+    if (normalizedSets.length === 0) {
+      normalizedSets = [{ ...DEFAULT_SET }];
+    }
+
+    // Raggruppa serie identiche in SetGroup
+    // Per semplicità, crea un singolo SetGroup con tutte le serie
+    const baseSet = normalizedSets[0] || { ...DEFAULT_SET };
+    setGroups = [
+      {
+        id: generateSetGroupId(),
+        count: normalizedSets.length,
+        baseSet,
+        sets: normalizedSets,
+      },
+    ];
   }
 
   return {
@@ -321,80 +307,36 @@ export function normalizeExercise(
     description,
     category: normalizeCategoryLabel(raw.category ?? raw.type),
     muscleGroups: ensureMuscleGroups(raw.muscleGroups ?? raw.targetMuscles ?? raw.muscleGroup),
-    // SSOT: Non più sets legacy, solo setGroups
+    setGroups,
     notes: ensureString(raw.coachingTips ?? raw.notes ?? raw.cues ?? ''),
     typeLabel: ensureString(raw.type ?? raw.exerciseType ?? ''),
     repRange:
       typeof rawReps === 'string' ? rawReps : repsNumber !== undefined ? `${repsNumber}` : '',
     formCues: Array.isArray(raw.formCues)
-      ? raw.formCues.map((cue: unknown) => ensureString(cue)).filter(Boolean)
+      ? raw.formCues.map((cue) => ensureString(cue)).filter(Boolean)
       : typeof raw.formCues === 'string'
         ? raw.formCues
             .split(/\r?\n|\./)
-            .map((entry: unknown) => ensureString(entry).trim())
+            .map((entry) => ensureString(entry).trim())
             .filter(Boolean)
         : [],
     equipment: Array.isArray(raw.equipment)
-      ? raw.equipment.map((item: unknown) => ensureString(item)).filter(Boolean)
+      ? raw.equipment.map((item) => ensureString(item)).filter(Boolean)
       : typeof raw.equipment === 'string'
         ? raw.equipment
             .split(/,|\//)
-            .map((entry: unknown) => ensureString(entry).trim())
+            .map((entry) => ensureString(entry).trim())
             .filter(Boolean)
         : [],
-    // catalogExerciseId: ID dell'esercizio nel catalogo database
-    // Legge da catalogExerciseId o exerciseId (legacy in JSON stored)
     catalogExerciseId:
-      typeof raw.catalogExerciseId === 'string' && raw.catalogExerciseId.length > 0
-        ? raw.catalogExerciseId
-        : typeof raw.exerciseId === 'string' && raw.exerciseId.length > 0
-          ? raw.exerciseId
+      typeof raw.exerciseId === 'string' && raw.exerciseId.length > 0
+        ? raw.exerciseId
+        : typeof raw.catalogExerciseId === 'string' && raw.catalogExerciseId.length > 0
+          ? raw.catalogExerciseId
           : '',
-    setGroups: (() => {
-      // Normalizza gruppi di serie se presenti
-      if (raw.setGroups && Array.isArray(raw.setGroups)) {
-        const groups = raw.setGroups
-          .map((g: unknown) => normalizeSetGroup(g))
-          .filter((g): g is SetGroup => g !== null);
-        if (groups.length > 0) return groups;
-      }
-
-      // Fallback: se non ci sono gruppi ma ci sono serie, crea un gruppo di default
-      // Questo gestisce legacy data e output AI che non producono setGroups
-      if (sets.length > 0) {
-        const baseSet = { ...sets[0] };
-        // Ensure strictly typed properties for SetGroup baseSet
-        const cleanBaseSet: ExerciseSet = {
-          reps: baseSet.reps,
-          repsMax: baseSet.repsMax,
-          duration: baseSet.duration,
-          weight: baseSet.weight ?? null,
-          weightMax: baseSet.weightMax ?? null,
-          weightLbs: baseSet.weightLbs ?? null,
-          rest: baseSet.rest ?? DEFAULT_SET.rest,
-          intensityPercent: baseSet.intensityPercent ?? null,
-          intensityPercentMax: baseSet.intensityPercentMax,
-          rpe: baseSet.rpe ?? null,
-          rpeMax: baseSet.rpeMax,
-          notes: baseSet.notes,
-        };
-
-        return [
-          {
-            id: createId(),
-            count: sets.length,
-            baseSet: cleanBaseSet,
-            sets: sets,
-          },
-        ];
-      }
-
-      return [];
-    })(),
     variation: (() => {
-      // Gestisci variation come oggetto multilingue
+      // Gestisci variation come oggetto multilingue (solo oggetti supportati)
       if (raw.variation && typeof raw.variation === 'object' && !Array.isArray(raw.variation)) {
-        // Se è già un oggetto Record<string, string>, mantenerlo
         const variation = raw.variation as Record<string, unknown>;
         const result: Record<string, string> = {};
         for (const [locale, value] of Object.entries(variation)) {
@@ -402,15 +344,11 @@ export function normalizeExercise(
             result[locale] = value;
           }
         }
-        // Assicura presenza di almeno 'en' (fallback a stringa vuota se mancante)
+        // Assicura presenza di almeno 'en'
         if (!result.en) {
           result.en = '';
         }
         return result;
-      }
-      // Se è una stringa, convertirla in oggetto
-      if (typeof raw.variation === 'string' && raw.variation.trim().length > 0) {
-        return { en: raw.variation.trim(), it: raw.variation.trim() };
       }
       // Default: oggetto vuoto con almeno 'en'
       return { en: '' };

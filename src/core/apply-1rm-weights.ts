@@ -13,7 +13,7 @@
  * - intensityPercent is preserved for user reference
  */
 
-// Using any for program type since the actual runtime structure (with setGroups)
+// Using ProgramWithWeeks interface since the actual runtime structure (with setGroups)
 // differs from the static WorkoutProgram type
 
 /**
@@ -44,7 +44,7 @@ interface ExerciseInSetGroup {
 
 /**
  * Generic workout program structure for type safety
- * Uses any for nested structures due to schema variations
+ * Uses Record<string, unknown> for nested structures due to schema variations
  */
 interface ProgramWithWeeks {
   weeks?: Array<{

@@ -1,22 +1,14 @@
-/**
- * Workout Normalization Service
- *
- * Centralized service for normalizing workout programs and calculating weights
- * based on user's 1RM. Follows SOLID principles with single responsibility.
- */
-
+import { OneRepMaxService } from './one-rep-max.service';
+import { normalizeAgentWorkoutPayload } from '@giulio-leone/one-workout';
+import { calculateSetWeights } from './workout-weight-calculator.service';
 import type {
   WorkoutProgram,
   WorkoutWeek,
   WorkoutDay,
   Exercise,
-  ExerciseSet,
   SetGroup,
-} from '@giulio-leone/types';
-import { OneRepMaxService } from '@giulio-leone/lib-exercise';
-import { normalizeAgentWorkoutPayload } from './transformers/program-server-transform';
-import { calculateSetWeights } from './calculators/weight-calculator';
-import { getExerciseSets, generateSetGroupId } from './helpers/utils/set-group-helpers';
+  ExerciseSet,
+} from '@giulio-leone/types/workout';
 
 /**
  * Normalize workout program and calculate weights based on user's 1RM
@@ -84,46 +76,12 @@ export async function normalizeWithWeightCalculation(
             return exercise;
           }
 
-          // SSOT: Aggiorna setGroups, non exercise.sets legacy
-          const currentSets = getExerciseSets(exercise);
-          const updatedSets = currentSets.map((set: ExerciseSet) =>
-            calculateSetWeights(set, oneRepMaxKg)
-          );
-
-          // Aggiorna setGroups con i nuovi pesi
-          let updatedSetGroups: SetGroup[];
-          if (exercise.setGroups && exercise.setGroups.length > 0) {
-            let setIdx = 0;
-            updatedSetGroups = exercise.setGroups.map((group: SetGroup) => {
-              const groupSetsCount = group.sets.length;
-              const newGroupSets = updatedSets.slice(setIdx, setIdx + groupSetsCount);
-              const updatedBaseSet = calculateSetWeights(group.baseSet, oneRepMaxKg);
-              setIdx += groupSetsCount;
-              return {
-                ...group,
-                baseSet: updatedBaseSet,
-                sets: newGroupSets,
-              };
-            });
-          } else {
-            // Crea un singolo setGroup
-            const defaultSet: ExerciseSet = {
-              reps: undefined,
-              weight: null,
-              weightLbs: null,
-              rest: 60,
-              intensityPercent: null,
-              rpe: null,
-            };
-            updatedSetGroups = [
-              {
-                id: generateSetGroupId(),
-                count: updatedSets.length,
-                baseSet: updatedSets[0] || defaultSet,
-                sets: updatedSets,
-              },
-            ];
-          }
+          // Update setGroups with calculated weights
+          const updatedSetGroups = exercise.setGroups.map((setGroup: SetGroup) => ({
+            ...setGroup,
+            baseSet: calculateSetWeights(setGroup.baseSet, oneRepMaxKg),
+            sets: setGroup.sets.map((set: ExerciseSet) => calculateSetWeights(set, oneRepMaxKg)),
+          }));
 
           return {
             ...exercise,

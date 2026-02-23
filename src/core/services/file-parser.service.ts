@@ -245,7 +245,7 @@ export class FileParserService {
         }
 
         // Prima riga = headers
-        const headers = (data[0] as string[]).map((h: any) => String(h).trim());
+        const headers = (data[0] as string[]).map((h: string) => String(h).trim());
         const columnMap = new Map<keyof typeof COLUMN_PATTERNS, number>();
 
         // Mappa le colonne
@@ -806,7 +806,7 @@ IMPORTANTE: Rispondi SOLO con un JSON valido nel formato ImportedWorkoutProgram,
 
     for (const chunk of chunks) {
       const results = await Promise.all(
-        chunk.map((file: any) => this.parseFile(file, options, aiContext))
+        chunk.map((file: ImportFile) => this.parseFile(file, options, aiContext))
       );
 
       for (const result of results) {
@@ -860,7 +860,7 @@ IMPORTANTE: Rispondi SOLO con un JSON valido nel formato ImportedWorkoutProgram,
       durationWeeks: allWeeks.length,
       weeks: allWeeks,
       sourceFile: programs
-        .map((p: any) => p.sourceFile)
+        .map((p: ImportedWorkoutProgram) => p.sourceFile)
         .filter(Boolean)
         .join(', '),
     });

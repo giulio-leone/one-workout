@@ -24,6 +24,29 @@ import type {
   UpdateWorkoutSessionRequest,
   WorkoutProgramStats,
 } from '@giulio-leone/types/workout';
+import type { Exercise, SetGroup } from '@giulio-leone/types';
+
+/** Loose JSON structure for workout week from DB */
+interface JsonWeek {
+  weekNumber: number;
+  days?: JsonDay[];
+  [key: string]: unknown;
+}
+
+/** Loose JSON structure for workout day from DB */
+interface JsonDay {
+  dayNumber: number;
+  exercises?: JsonExercise[];
+  [key: string]: unknown;
+}
+
+/** Loose JSON structure for exercise from DB */
+interface JsonExercise {
+  id?: string;
+  name?: string;
+  setGroups?: SetGroup[];
+  [key: string]: unknown;
+}
 
 /**
  * Create a new workout session
@@ -88,7 +111,7 @@ export async function createWorkoutSession(
     }
 
     // Extract exercises from the program's week/day structure
-    let weeks = program.weeks as any; // JSON from DB
+    let weeks = program.weeks as unknown as JsonWeek[]; // JSON from DB
     logger.warn('[createWorkoutSession] Weeks info:', {
       type: typeof weeks,
       isArray: Array.isArray(weeks),
@@ -105,34 +128,38 @@ export async function createWorkoutSession(
     }
 
     // Loose equality check for weekNumber to handle string/number mismatch in JSON
-    const week = Array.isArray(weeks) ? weeks.find((w: any) => w.weekNumber == weekNumber) : null;
+    const week = Array.isArray(weeks)
+      ? weeks.find((w: JsonWeek) => w.weekNumber == weekNumber)
+      : null;
 
     if (!week) {
       logger.error('[createWorkoutSession] Week not found:', {
         weekNumber,
-        available: Array.isArray(weeks) ? weeks.map((w: any) => w.weekNumber) : 'none',
+        available: Array.isArray(weeks) ? weeks.map((w: JsonWeek) => w.weekNumber) : 'none',
       });
       throw new Error(`Settimana ${weekNumber} non trovata nel programma`);
     }
 
     // Loose equality check for dayNumber
-    const day = week.days?.find((d: any) => d.dayNumber == dayNumber);
+    const day = week.days?.find((d: JsonDay) => d.dayNumber == dayNumber);
 
     if (!day) {
       logger.error('[createWorkoutSession] Day not found:', {
         dayNumber,
-        available: week.days?.map((d: any) => d.dayNumber),
+        available: week.days?.map((d: JsonDay) => d.dayNumber),
       });
       throw new Error(`Giorno ${dayNumber} non trovato nella settimana ${weekNumber}`);
     }
 
-    logger.warn('[createWorkoutSession] Day found, exercises count:', day.exercises?.length);
+    logger.warn('[createWorkoutSession] Day found, exercises count:', {
+      count: day.exercises?.length,
+    });
 
     // Ensure exercises is a valid object for Prisma JSON
     // SSOT: setGroups è l'unica fonte di verità per le serie
     // Hydrate setGroups[].sets da baseSet + count usando helper centralizzato
     const exercises = day.exercises
-      ? structuredClone(day.exercises).map((ex: any) => {
+      ? structuredClone(day.exercises).map((ex: JsonExercise) => {
           if (ex.setGroups && ex.setGroups.length > 0) {
             logger.warn(
               `[createWorkoutSession] Hydrating setGroups for exercise ${ex.name || ex.id}`
@@ -156,7 +183,7 @@ export async function createWorkoutSession(
         programId,
         weekNumber,
         dayNumber,
-        exercises: exercises,
+        exercises: exercises as unknown as import('@prisma/client').Prisma.InputJsonValue,
         notes,
         updatedAt: new Date(),
       },
@@ -196,7 +223,7 @@ export async function getWorkoutSession(
   const result = mapToWorkoutSession(session);
 
   // DEBUG: Log loaded session exercises structure
-  const exercises = result.exercises as any[];
+  const exercises = result.exercises as Exercise[];
   logger.warn('[getWorkoutSession] Loaded session:', {
     sessionId,
     exerciseCount: exercises?.length,
@@ -267,7 +294,7 @@ export async function updateWorkoutSession(
 
   // DEBUG: Log what we're saving
   if (updates.exercises) {
-    const exercises = updates.exercises as any[];
+    const exercises = updates.exercises as Exercise[];
     logger.warn('[updateWorkoutSession] Saving exercises sample:', {
       sessionId,
       exerciseCount: exercises?.length,
@@ -340,13 +367,13 @@ export async function getWorkoutProgramStats(
   });
 
   const totalSessions = sessions.length;
-  const completedSessions = sessions.filter((s: any) => s.completedAt !== null).length;
+  const completedSessions = sessions.filter((s) => s.completedAt !== null).length;
   const inProgressSessions = totalSessions - completedSessions;
 
   const lastSession = sessions.sort((a, b) => b.startedAt.getTime() - a.startedAt.getTime())[0];
 
   // Calculate average duration for completed sessions
-  const completedWithDuration = sessions.filter((s: any) => s.completedAt !== null && s.startedAt);
+  const completedWithDuration = sessions.filter((s) => s.completedAt !== null && s.startedAt);
   const averageDuration =
     completedWithDuration.length > 0
       ? completedWithDuration.reduce((sum: number, s) => {

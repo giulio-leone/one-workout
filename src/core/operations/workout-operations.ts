@@ -337,7 +337,7 @@ export function groupSelectedSets(
 
   // SSOT: Usa setGroups per accedere a tutte le serie
   const allSets: ExerciseSet[] = [];
-  (exercise.setGroups || []).forEach((group: any) => {
+  (exercise.setGroups || []).forEach((group: SetGroup) => {
     allSets.push(...group.sets);
   });
 
@@ -501,7 +501,7 @@ export function duplicateSetGroup(
   if (duplicatedGroup.progression) {
     duplicatedGroup.progression = {
       ...duplicatedGroup.progression,
-      steps: duplicatedGroup.progression.steps.map((s: any) => ({ ...s })),
+      steps: duplicatedGroup.progression.steps.map((s) => ({ ...s })),
     };
   }
 

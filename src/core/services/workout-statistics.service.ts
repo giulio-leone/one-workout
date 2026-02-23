@@ -1,4 +1,12 @@
-import type { WorkoutProgram } from '@giulio-leone/types';
+import type {
+  WorkoutProgram,
+  WorkoutWeek,
+  WorkoutDay,
+  Exercise,
+  SetGroup,
+  ExerciseSet,
+  MuscleGroup,
+} from '@giulio-leone/types';
 
 export interface WeeklyStats {
   week: number;
@@ -55,7 +63,7 @@ export class WorkoutStatisticsService {
     let setsWithIntensity = 0;
     let setsWithRpe = 0;
 
-    program.weeks.forEach((week: any) => {
+    program.weeks.forEach((week: WorkoutWeek) => {
       let weekVolumeLoad = 0;
       let weekSets = 0;
       let weekLifts = 0;
@@ -64,8 +72,8 @@ export class WorkoutStatisticsService {
       let weekSetsWithIntensity = 0;
       let weekSetsWithRpe = 0;
 
-      week.days.forEach((day: any) => {
-        day.exercises.forEach((exercise: any) => {
+      week.days.forEach((day: WorkoutDay) => {
+        day.exercises.forEach((exercise: Exercise) => {
           // --- Exercise Stats Aggregation ---
           const exerciseKey = exercise.name;
           if (!exerciseData[exerciseKey]) {
@@ -88,8 +96,8 @@ export class WorkoutStatisticsService {
           let exIntensityPoints = 0;
           let exRpePoints = 0;
 
-          exercise.setGroups.forEach((group: any) => {
-            group.sets.forEach((set: any) => {
+          exercise.setGroups.forEach((group: SetGroup) => {
+            group.sets.forEach((set: ExerciseSet) => {
               const reps = set.reps || 0;
               const weight = set.weight || 0;
               const volume = reps * weight;
@@ -130,7 +138,7 @@ export class WorkoutStatisticsService {
               }
 
               // --- Muscle Stats ---
-              exercise.muscleGroups.forEach((muscleName: any) => {
+              exercise.muscleGroups.forEach((muscleName: MuscleGroup) => {
                 const key = muscleName;
                 if (!muscleData[key]) {
                   muscleData[key] = {
@@ -171,7 +179,7 @@ export class WorkoutStatisticsService {
     const muscleChartData = Object.values(muscleData).sort((a, b) => b.sets - a.sets);
 
     const exerciseStats = Object.values(exerciseData)
-      .map((e: any) => ({
+      .map((e: ExerciseStats) => ({
         ...e,
         avgIntensity: e.totalSets > 0 ? e.avgIntensity / e.totalSets : 0,
         avgRpe: e.totalSets > 0 ? e.avgRpe / e.totalSets : 0,

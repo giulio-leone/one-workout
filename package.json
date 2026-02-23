@@ -1,6 +1,6 @@
 {
   "name": "@giulio-leone/one-workout",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "OneWorkout - Unified Workout Domain for OneCoach",
   "type": "module",
   "main": "./dist/index.cjs",

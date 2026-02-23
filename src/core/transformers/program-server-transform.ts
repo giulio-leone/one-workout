@@ -14,7 +14,7 @@ import { DifficultyLevel, WorkoutStatus } from '@prisma/client';
 import type { WorkoutProgram } from '@giulio-leone/types';
 import { createId } from '@giulio-leone/lib-shared';
 import { ensureArrayOfStrings, ensureNumber, ensureString } from '../utils';
-import { convertWorkoutGoalNamesToIds } from '@giulio-leone/lib-metadata';
+import { convertWorkoutGoalNamesToIds } from '@giulio-leone/lib-core';
 import {
   normalizeDifficulty,
   normalizeStatus,

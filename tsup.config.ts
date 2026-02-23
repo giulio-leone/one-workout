@@ -11,7 +11,7 @@ export default defineConfig({
     'core/calculators/progression-calculator': 'src/core/calculators/progression-calculator.ts',
   },
   format: ['esm', 'cjs'],
-  dts: true,
+  dts: false,
   splitting: false,
   sourcemap: true,
   clean: true,

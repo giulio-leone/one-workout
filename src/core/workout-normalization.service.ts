@@ -13,7 +13,7 @@ import type {
   ExerciseSet,
   SetGroup,
 } from '@giulio-leone/types';
-import { OneRepMaxService } from '@giulio-leone/lib-exercise';
+import { OneRepMaxService } from '../exercise/one-rep-max.service';
 import { normalizeAgentWorkoutPayload } from './transformers/program-server-transform';
 import { calculateSetWeights } from './calculators/weight-calculator';
 import { getExerciseSets, generateSetGroupId } from './helpers/utils/set-group-helpers';

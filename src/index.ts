@@ -38,3 +38,6 @@ export {
   RPE_OPTIONS,
   REST_OPTIONS,
 } from './core/helpers/utils/range-parser';
+
+// Exercise services (merged from lib-exercise)
+export * from './exercise';

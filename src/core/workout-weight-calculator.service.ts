@@ -13,7 +13,7 @@ import type {
   ExerciseSet,
   SetGroup,
 } from '@giulio-leone/types';
-import { OneRepMaxService } from '@giulio-leone/lib-exercise';
+import { OneRepMaxService } from '../exercise/one-rep-max.service';
 import { prisma } from '@giulio-leone/lib-core';
 import { userProfileService } from '@giulio-leone/lib-core/user-profile.service';
 import { prepareProgramForPersistence } from './transformers/program-transform';

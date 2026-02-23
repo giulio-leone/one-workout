@@ -55,7 +55,6 @@
   },
   "dependencies": {
     "@giulio-leone/lib-core": "workspace:*",
-    "@giulio-leone/lib-exercise": "workspace:*",
     "@giulio-leone/lib-shared": "workspace:*",
     "@giulio-leone/one-agent": "workspace:*",
     "@giulio-leone/schemas": "workspace:*",

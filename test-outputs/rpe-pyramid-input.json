@@ -1,0 +1,74 @@
+{
+  "name": "RPE Pyramid Test",
+  "description": "Test con RPE",
+  "difficulty": "ADVANCED",
+  "durationWeeks": 1,
+  "goals": [
+    "strength"
+  ],
+  "weeks": [
+    {
+      "weekNumber": 1,
+      "focus": "Test",
+      "notes": "Test",
+      "days": [
+        {
+          "dayNumber": 1,
+          "dayName": "Monday",
+          "name": "Test Day",
+          "targetMuscles": [
+            "back"
+          ],
+          "notes": "Test",
+          "cooldown": "5 min",
+          "exercises": [
+            {
+              "name": "Deadlift",
+              "description": "Stacco piramidale con RPE",
+              "type": "compound",
+              "category": "strength",
+              "setGroups": [
+                {
+                  "id": "sg_w1d1e1",
+                  "count": 5,
+                  "baseSet": {
+                    "reps": [
+                      5,
+                      4,
+                      3,
+                      2,
+                      1
+                    ],
+                    "weight": [
+                      140,
+                      150,
+                      160,
+                      170,
+                      180
+                    ],
+                    "weightLbs": null,
+                    "intensityPercent": null,
+                    "rpe": [
+                      7,
+                      8,
+                      9,
+                      9,
+                      10
+                    ],
+                    "rest": [
+                      180,
+                      240,
+                      300,
+                      300,
+                      360
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

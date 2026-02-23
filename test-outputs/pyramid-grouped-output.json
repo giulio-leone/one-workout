@@ -1,0 +1,142 @@
+{
+  "name": "Grouped Pyramid Test",
+  "description": "Test raggruppamento automatico",
+  "difficulty": "ADVANCED",
+  "durationWeeks": 1,
+  "goals": [
+    "strength"
+  ],
+  "weeks": [
+    {
+      "weekNumber": 1,
+      "focus": "Test",
+      "notes": "Test",
+      "days": [
+        {
+          "dayNumber": 1,
+          "dayName": "Monday",
+          "name": "Test Day",
+          "targetMuscles": [
+            "chest"
+          ],
+          "notes": "Test",
+          "cooldown": "5 min",
+          "exercises": [
+            {
+              "name": "Bench Press",
+              "description": "Test",
+              "type": "compound",
+              "category": "strength",
+              "setGroups": [
+                {
+                  "id": "sg_w1d1e1_g1",
+                  "count": 1,
+                  "baseSet": {
+                    "reps": 10,
+                    "weight": 60,
+                    "weightLbs": 132,
+                    "intensityPercent": 70,
+                    "rpe": 7,
+                    "rest": 120
+                  },
+                  "sets": [
+                    {
+                      "reps": 10,
+                      "weight": 60,
+                      "weightLbs": 132,
+                      "intensityPercent": 70,
+                      "rpe": 7,
+                      "rest": 120
+                    }
+                  ]
+                },
+                {
+                  "id": "sg_w1d1e1_g2",
+                  "count": 2,
+                  "baseSet": {
+                    "reps": 6,
+                    "weight": 80,
+                    "weightLbs": 176,
+                    "intensityPercent": 80,
+                    "rpe": 8,
+                    "rest": 150
+                  },
+                  "sets": [
+                    {
+                      "reps": 6,
+                      "weight": 80,
+                      "weightLbs": 176,
+                      "intensityPercent": 80,
+                      "rpe": 8,
+                      "rest": 150
+                    },
+                    {
+                      "reps": 6,
+                      "weight": 80,
+                      "weightLbs": 176,
+                      "intensityPercent": 80,
+                      "rpe": 8,
+                      "rest": 150
+                    }
+                  ]
+                },
+                {
+                  "id": "sg_w1d1e1_g3",
+                  "count": 1,
+                  "baseSet": {
+                    "reps": 4,
+                    "weight": 85,
+                    "weightLbs": 187.00000000000003,
+                    "intensityPercent": 82.5,
+                    "rpe": 9,
+                    "rest": 180
+                  },
+                  "sets": [
+                    {
+                      "reps": 4,
+                      "weight": 85,
+                      "weightLbs": 187.00000000000003,
+                      "intensityPercent": 82.5,
+                      "rpe": 9,
+                      "rest": 180
+                    }
+                  ]
+                },
+                {
+                  "id": "sg_w1d1e1_g4",
+                  "count": 2,
+                  "baseSet": {
+                    "reps": 3,
+                    "weight": 90,
+                    "weightLbs": 198.00000000000003,
+                    "intensityPercent": 87.5,
+                    "rpe": 9,
+                    "rest": 180
+                  },
+                  "sets": [
+                    {
+                      "reps": 3,
+                      "weight": 90,
+                      "weightLbs": 198.00000000000003,
+                      "intensityPercent": 87.5,
+                      "rpe": 9,
+                      "rest": 180
+                    },
+                    {
+                      "reps": 3,
+                      "weight": 90,
+                      "weightLbs": 198.00000000000003,
+                      "intensityPercent": 87.5,
+                      "rpe": 9,
+                      "rest": 180
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "name": "Pyramid Strength Program",
+  "description": "Programma con serie piramidali complete",
+  "difficulty": "ADVANCED",
+  "durationWeeks": 1,
+  "goals": [
+    "strength"
+  ],
+  "weeks": [
+    {
+      "weekNumber": 1,
+      "focus": "Strength Pyramid",
+      "notes": "Piramidale completo con tutti i parametri variabili",
+      "days": [
+        {
+          "dayNumber": 1,
+          "dayName": "Monday",
+          "name": "Strength Day",
+          "targetMuscles": [
+            "chest"
+          ],
+          "notes": "Panca piramidale",
+          "cooldown": "5 min stretching",
+          "exercises": [
+            {
+              "name": "Barbell Bench Press",
+              "description": "Panca piana piramidale",
+              "type": "compound",
+              "category": "strength",
+              "setGroups": [
+                {
+                  "id": "sg_w1d1e1",
+                  "count": 6,
+                  "baseSet": {
+                    "reps": [
+                      10,
+                      8,
+                      6,
+                      4,
+                      4,
+                      3
+                    ],
+                    "weight": [
+                      60,
+                      70,
+                      80,
+                      85,
+                      90,
+                      95
+                    ],
+                    "weightLbs": null,
+                    "intensityPercent": [
+                      70,
+                      75,
+                      80,
+                      82.5,
+                      85,
+                      87.5
+                    ],
+                    "rpe": [
+                      7,
+                      8,
+                      8,
+                      9,
+                      9,
+                      9
+                    ],
+                    "rest": [
+                      120,
+                      150,
+                      180,
+                      180,
+                      180,
+                      240
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

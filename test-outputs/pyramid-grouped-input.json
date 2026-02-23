@@ -1,0 +1,85 @@
+{
+  "name": "Grouped Pyramid Test",
+  "description": "Test raggruppamento automatico",
+  "difficulty": "ADVANCED",
+  "durationWeeks": 1,
+  "goals": [
+    "strength"
+  ],
+  "weeks": [
+    {
+      "weekNumber": 1,
+      "focus": "Test",
+      "notes": "Test",
+      "days": [
+        {
+          "dayNumber": 1,
+          "dayName": "Monday",
+          "name": "Test Day",
+          "targetMuscles": [
+            "chest"
+          ],
+          "notes": "Test",
+          "cooldown": "5 min",
+          "exercises": [
+            {
+              "name": "Bench Press",
+              "description": "Test",
+              "type": "compound",
+              "category": "strength",
+              "setGroups": [
+                {
+                  "id": "sg_w1d1e1",
+                  "count": 6,
+                  "baseSet": {
+                    "reps": [
+                      10,
+                      6,
+                      6,
+                      4,
+                      3,
+                      3
+                    ],
+                    "weight": [
+                      60,
+                      80,
+                      80,
+                      85,
+                      90,
+                      90
+                    ],
+                    "weightLbs": null,
+                    "intensityPercent": [
+                      70,
+                      80,
+                      80,
+                      82.5,
+                      87.5,
+                      87.5
+                    ],
+                    "rpe": [
+                      7,
+                      8,
+                      8,
+                      9,
+                      9,
+                      9
+                    ],
+                    "rest": [
+                      120,
+                      150,
+                      150,
+                      180,
+                      180,
+                      180
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

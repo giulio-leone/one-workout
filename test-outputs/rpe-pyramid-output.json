@@ -1,0 +1,92 @@
+{
+  "name": "RPE Pyramid Test",
+  "description": "Test con RPE",
+  "difficulty": "ADVANCED",
+  "durationWeeks": 1,
+  "goals": [
+    "strength"
+  ],
+  "weeks": [
+    {
+      "weekNumber": 1,
+      "focus": "Test",
+      "notes": "Test",
+      "days": [
+        {
+          "dayNumber": 1,
+          "dayName": "Monday",
+          "name": "Test Day",
+          "targetMuscles": [
+            "back"
+          ],
+          "notes": "Test",
+          "cooldown": "5 min",
+          "exercises": [
+            {
+              "name": "Deadlift",
+              "description": "Stacco piramidale con RPE",
+              "type": "compound",
+              "category": "strength",
+              "setGroups": [
+                {
+                  "id": "sg_w1d1e1",
+                  "count": 5,
+                  "baseSet": {
+                    "reps": 5,
+                    "weight": 140,
+                    "weightLbs": 308,
+                    "intensityPercent": null,
+                    "rpe": 7,
+                    "rest": 180
+                  },
+                  "sets": [
+                    {
+                      "reps": 5,
+                      "weight": 140,
+                      "weightLbs": 308,
+                      "intensityPercent": null,
+                      "rpe": 7,
+                      "rest": 180
+                    },
+                    {
+                      "reps": 4,
+                      "weight": 150,
+                      "weightLbs": 330,
+                      "intensityPercent": null,
+                      "rpe": 8,
+                      "rest": 240
+                    },
+                    {
+                      "reps": 3,
+                      "weight": 160,
+                      "weightLbs": 352,
+                      "intensityPercent": null,
+                      "rpe": 9,
+                      "rest": 300
+                    },
+                    {
+                      "reps": 2,
+                      "weight": 170,
+                      "weightLbs": 374.00000000000006,
+                      "intensityPercent": null,
+                      "rpe": 9,
+                      "rest": 300
+                    },
+                    {
+                      "reps": 1,
+                      "weight": 180,
+                      "weightLbs": 396.00000000000006,
+                      "intensityPercent": null,
+                      "rpe": 10,
+                      "rest": 360
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

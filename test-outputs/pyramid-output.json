@@ -1,0 +1,100 @@
+{
+  "name": "Pyramid Strength Program",
+  "description": "Programma con serie piramidali complete",
+  "difficulty": "ADVANCED",
+  "durationWeeks": 1,
+  "goals": [
+    "strength"
+  ],
+  "weeks": [
+    {
+      "weekNumber": 1,
+      "focus": "Strength Pyramid",
+      "notes": "Piramidale completo con tutti i parametri variabili",
+      "days": [
+        {
+          "dayNumber": 1,
+          "dayName": "Monday",
+          "name": "Strength Day",
+          "targetMuscles": [
+            "chest"
+          ],
+          "notes": "Panca piramidale",
+          "cooldown": "5 min stretching",
+          "exercises": [
+            {
+              "name": "Barbell Bench Press",
+              "description": "Panca piana piramidale",
+              "type": "compound",
+              "category": "strength",
+              "setGroups": [
+                {
+                  "id": "sg_w1d1e1",
+                  "count": 6,
+                  "baseSet": {
+                    "reps": 10,
+                    "weight": 60,
+                    "weightLbs": 132,
+                    "intensityPercent": 70,
+                    "rpe": 7,
+                    "rest": 120
+                  },
+                  "sets": [
+                    {
+                      "reps": 10,
+                      "weight": 60,
+                      "weightLbs": 132,
+                      "intensityPercent": 70,
+                      "rpe": 7,
+                      "rest": 120
+                    },
+                    {
+                      "reps": 8,
+                      "weight": 70,
+                      "weightLbs": 154,
+                      "intensityPercent": 75,
+                      "rpe": 8,
+                      "rest": 150
+                    },
+                    {
+                      "reps": 6,
+                      "weight": 80,
+                      "weightLbs": 176,
+                      "intensityPercent": 80,
+                      "rpe": 8,
+                      "rest": 180
+                    },
+                    {
+                      "reps": 4,
+                      "weight": 85,
+                      "weightLbs": 187.00000000000003,
+                      "intensityPercent": 82.5,
+                      "rpe": 9,
+                      "rest": 180
+                    },
+                    {
+                      "reps": 4,
+                      "weight": 90,
+                      "weightLbs": 198.00000000000003,
+                      "intensityPercent": 85,
+                      "rpe": 9,
+                      "rest": 180
+                    },
+                    {
+                      "reps": 3,
+                      "weight": 95,
+                      "weightLbs": 209.00000000000003,
+                      "intensityPercent": 87.5,
+                      "rpe": 9,
+                      "rest": 240
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

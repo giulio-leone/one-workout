@@ -166,7 +166,7 @@ export function applyUserOneRepMaxWeights(
     }
   }
 
-  console.log(
+  console.warn(
     `[Apply1RMWeights] Applied ${appliedCount} weights, ${missingCount} missing 1RM values`
   );
 

@@ -82,7 +82,7 @@ export type LocalizedExercise = z.infer<typeof LocalizedExerciseSchema>;
  */
 const transformLogger = {
   info: (message: string, meta?: Record<string, unknown>) => {
-    console.log(`[MergeExercises] ${message}`, meta ?? '');
+    console.warn(`[MergeExercises] ${message}`, meta ?? '');
   },
   warn: (message: string, meta?: Record<string, unknown>) => {
     console.warn(`[MergeExercises] ${message}`, meta ?? '');

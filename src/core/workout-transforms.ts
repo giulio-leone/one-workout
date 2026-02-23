@@ -152,7 +152,7 @@ function assembleWeeksFromDiffsTransform(rawInput: Record<string, unknown>): unk
       oneRepMaxMap,
       weightIncrement
     ) as typeof program;
-    console.log(`${LOG_PREFIX} Applied 1RM weights for ${userOneRepMaxes.length} exercises`);
+    console.warn(`${LOG_PREFIX} Applied 1RM weights for ${userOneRepMaxes.length} exercises`);
   }
 
   // Return complete output matching WorkoutGenerationOutputSchema
@@ -240,7 +240,7 @@ function mergeExercisesTransform(rawInput: Record<string, unknown>): unknown {
   // Use sync version since transforms are synchronous
   const result = mergeExercisesSync(mergeInput);
 
-  console.log(`${LOG_PREFIX} MergeExercises completed:`, {
+  console.warn(`${LOG_PREFIX} MergeExercises completed:`, {
     total: result.correctionStats.total,
     corrected: result.correctionStats.corrected,
   });

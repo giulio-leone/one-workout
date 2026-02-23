@@ -8,7 +8,6 @@ import {
   calculateRPEFromIntensity,
   estimateOneRMFromReps,
   syncSetValues,
-  type FocusField,
 } from './intensity-calculator';
 
 // =============================================================================

@@ -57,7 +57,6 @@
     "@giulio-leone/contracts": "workspace:*",
     "@giulio-leone/lib-core": "workspace:*",
     "@giulio-leone/lib-exercise": "workspace:*",
-    "@giulio-leone/lib-import-core": "workspace:*",
     "@giulio-leone/lib-metadata": "workspace:*",
     "@giulio-leone/lib-shared": "workspace:*",
     "@giulio-leone/one-agent": "workspace:*",

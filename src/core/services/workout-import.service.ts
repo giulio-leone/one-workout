@@ -22,8 +22,8 @@ import { ImportOptionsSchema, IMPORT_LIMITS as WORKOUT_LIMITS } from '@giulio-le
 import { FileValidatorService } from './file-validator.service';
 import { FileParserService } from './file-parser.service';
 import { ExerciseMatcherService } from './exercise-matcher.service';
-import type { BaseImportResult, AIParseContext } from '@giulio-leone/lib-import-core';
-import { BaseImportService } from '@giulio-leone/lib-import-core';
+import type { BaseImportResult, AIParseContext } from '@giulio-leone/lib-shared/import-core';
+import { BaseImportService } from '@giulio-leone/lib-shared/import-core';
 
 /**
  * Risultato dell'import

@@ -7,7 +7,7 @@
  * @module lib-workout/services/workout-vision
  */
 
-import { parseWithVisionAI } from '@giulio-leone/lib-import-core';
+import { parseWithVisionAI } from '@giulio-leone/lib-shared/import-core';
 import { ImportedWorkoutProgramSchema, type ImportedWorkoutProgram } from '@giulio-leone/schemas';
 
 // ==================== PROMPTS ====================

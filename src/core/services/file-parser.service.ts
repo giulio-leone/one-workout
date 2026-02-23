@@ -7,7 +7,7 @@
  * @module lib-workout/services/file-parser
  */
 import { logger } from '@giulio-leone/lib-core';
-import type { AIParseContext } from '@giulio-leone/lib-import-core';
+import type { AIParseContext } from '@giulio-leone/lib-shared/import-core';
 
 import {
   ImportedWorkoutProgramSchema,

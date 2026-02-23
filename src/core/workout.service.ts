@@ -9,7 +9,7 @@ import { createId, getCurrentTimestamp, storageService } from '@giulio-leone/lib
 import type { IStorageService } from '@giulio-leone/lib-shared';
 import type { WorkoutProgram } from '@giulio-leone/types';
 import type { ApiResponse } from '@giulio-leone/types'; // Or from api.types
-import type { IWorkoutService } from '@giulio-leone/contracts';
+import type { IWorkoutService } from '@giulio-leone/lib-shared';
 
 /**
  * Storage key per workouts

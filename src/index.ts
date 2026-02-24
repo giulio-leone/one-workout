@@ -42,5 +42,3 @@ export {
 // Exercise services (merged from lib-exercise)
 export * from './exercise';
 
-// Import/Export schemas (from schemas package, re-exported for consumers)
-export { IMPORT_LIMITS, ImportFileSchema, ImportOptionsSchema, SUPPORTED_MIME_TYPES } from '@giulio-leone/schemas';

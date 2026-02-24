@@ -7,7 +7,6 @@ export default defineConfig({
     'core/transformers/program-server-transform': 'src/core/transformers/program-server-transform.ts',
     'core/normalizers/workout-normalizer': 'src/core/normalizers/workout-normalizer.ts',
     'core/calculators/weight-calculator': 'src/core/calculators/weight-calculator.ts',
-    'core/workout-weight-calculator.service': 'src/core/workout-weight-calculator.service.ts',
     'core/calculators/progression-calculator': 'src/core/calculators/progression-calculator.ts',
   },
   format: ['esm', 'cjs'],

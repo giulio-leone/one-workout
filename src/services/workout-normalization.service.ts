@@ -1,4 +1,4 @@
-import { OneRepMaxService } from './one-rep-max.service';
+import { OneRepMaxService } from '../exercise/one-rep-max.service';
 import { normalizeAgentWorkoutPayload } from '@giulio-leone/one-workout';
 import { calculateSetWeights } from './workout-weight-calculator.service';
 import type {

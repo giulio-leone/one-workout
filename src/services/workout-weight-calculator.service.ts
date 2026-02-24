@@ -9,7 +9,7 @@ import {
 } from '@giulio-leone/one-workout';
 import { kgToLbs, logger, toPrismaJsonValue } from '@giulio-leone/lib-shared';
 import { prisma } from '@giulio-leone/lib-core';
-import { OneRepMaxService } from './one-rep-max.service';
+import { OneRepMaxService } from '../exercise/one-rep-max.service';
 import type { WorkoutProgram, ExerciseSet, SetGroup } from '@giulio-leone/types/workout';
 
 const log = logger.child('WorkoutWeightCalculatorService');

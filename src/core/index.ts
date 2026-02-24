@@ -33,7 +33,6 @@ export * from './mappers/workout-session.mapper';
 // Services
 export * from './services/granular-session.service';
 export * from './workout.service';
-export * from './workout-weight-calculator.service';
 export * from './services/workout-import.service';
 export * from './workout-tracking.service';
 export * from './services/workout-vision.service';

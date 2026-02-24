@@ -17,7 +17,7 @@ import {
   ensureString,
   parseJsonIfString,
 } from '../utils/type-helpers';
-import { normalizeExercise } from './exercise-normalizer';
+import { normalizeExercise } from '../../services/exercise-normalizer';
 
 type RawJson = Record<string, unknown>;
 

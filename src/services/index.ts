@@ -20,8 +20,8 @@ export {
   type ExerciseGenerationResult,
 } from './exercise-generation.service';
 
-// One Rep Max
-export { OneRepMaxService } from './one-rep-max.service';
+// One Rep Max (canonical in exercise/)
+export { OneRepMaxService } from '../exercise/one-rep-max.service';
 
 // Weight Calculator
 export { calculateWeightsInProgram } from './workout-weight-calculator.service';

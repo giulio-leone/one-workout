@@ -43,6 +43,10 @@ export * from './services/workout-statistics.service';
 export * from './services/workout-progression.service';
 export * from './services/progression-template.service';
 
+// Domain Services (extracted from server actions)
+export * from './services/workout-program.service';
+export * from './services/exercise-query.service';
+
 // Schemas & Constants
 export * from './constants';
 

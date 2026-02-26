@@ -7,7 +7,7 @@
  * NOMENCLATURA:
  * - catalogExerciseId: ID dell'esercizio nel catalogo (exercises.id)
  *
- * La validazione usa lo schema Zod centralizzato da @onecoach/schemas
+ * La validazione usa lo schema Zod centralizzato da @giulio-leone/schemas
  */
 
 import { prisma } from '@giulio-leone/lib-core';

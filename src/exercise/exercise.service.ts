@@ -142,7 +142,7 @@ interface ExerciseSnapshot {
   }>;
 }
 
-// Remote local interfaces in favor of @onecoach/types equivalents
+// Remote local interfaces in favor of @giulio-leone/types equivalents
 // export interface ExerciseTranslationView { ... }
 // export interface LocalizedExercise { ... }
 

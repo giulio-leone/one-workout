@@ -5,7 +5,7 @@
  */
 
 import { resolve } from 'path';
-import { execute } from '@giulio-leone/one-agent/framework';
+import { execute } from '@giulio-leone/one-agent/framework/engine';
 import type { ProgressCallback } from '@giulio-leone/agent-contracts';
 import { initializeWorkoutSchemas } from '../registry';
 import type {

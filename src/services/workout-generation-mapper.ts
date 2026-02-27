@@ -71,7 +71,7 @@ export function mapDifficulty(difficulty: string | undefined | null): Difficulty
 export function mapAISetGroupToSetGroup(aiSetGroup: AISetGroup): SetGroup {
   const id = crypto.randomUUID();
   const count = aiSetGroup.count || 1;
-  const aiBaseSet = aiSetGroup.baseSet as unknown as AIBaseSetFlexible;
+  const aiBaseSet = aiSetGroup.baseSet as AIBaseSetFlexible;
 
   // 1. Create the canonical base set (take the first values if pyramid)
   const baseSet: ExerciseSet = {

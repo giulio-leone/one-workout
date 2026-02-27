@@ -12,7 +12,7 @@
  * - Dependency Inversion: Depends on Prisma abstraction
  */
 
-import { prisma } from '@giulio-leone/lib-core';
+import { prisma, type Prisma } from '@giulio-leone/lib-core';
 import { createId } from '@giulio-leone/lib-shared/id-generator';
 import { toPrismaJsonValue } from '@giulio-leone/lib-shared';
 import { mapToWorkoutSession, mapToWorkoutSessions } from './mappers/workout-session.mapper';
@@ -111,7 +111,7 @@ export async function createWorkoutSession(
     }
 
     // Extract exercises from the program's week/day structure
-    let weeks = program.weeks as unknown as JsonWeek[]; // JSON from DB
+    let weeks = program.weeks as Prisma.JsonValue[] as JsonWeek[]; // JSON from DB
     logger.warn('[createWorkoutSession] Weeks info:', {
       type: typeof weeks,
       isArray: Array.isArray(weeks),
@@ -183,7 +183,7 @@ export async function createWorkoutSession(
         programId,
         weekNumber,
         dayNumber,
-        exercises: exercises as unknown as import('@prisma/client').Prisma.InputJsonValue,
+        exercises: toPrismaJsonValue(exercises),
         notes,
         updatedAt: new Date(),
       },

@@ -7,8 +7,15 @@
 import { describe, it, expect } from 'vitest';
 import { expandSetGroups, expandSetGroupsWithAutoGroup } from './program-builder';
 import type { AIWorkoutProgram } from '@giulio-leone/schemas';
+import type { PyramidBaseSet } from './program-builder';
+import type { ExerciseSet } from '@giulio-leone/types/workout';
 import * as fs from 'fs';
 import * as path from 'path';
+
+/** Test helper: creates a baseSet with pyramid (array) fields typed as ExerciseSet */
+function makePyramidBaseSet(data: PyramidBaseSet): ExerciseSet {
+  return data as unknown as ExerciseSet;
+}
 
 // Helper per salvare JSON
 function saveJSON(filename: string, data: unknown) {
@@ -58,19 +65,19 @@ describe('Pyramid Sets - Test con Logging e JSON', () => {
                     {
                       id: 'sg_w1d1e1',
                       count: 6,
-                      baseSet: {
+                      baseSet: makePyramidBaseSet({
                         // Pattern: 10-8-6-4-4-3 reps
-                        reps: [10, 8, 6, 4, 4, 3] as unknown as number,
+                        reps: [10, 8, 6, 4, 4, 3],
                         // Weight DEVE aumentare con l'intensità
-                        weight: [60, 70, 80, 85, 90, 95] as unknown as number,
+                        weight: [60, 70, 80, 85, 90, 95],
                         weightLbs: null, // Verrà calcolato
                         // Intensità crescente
-                        intensityPercent: [70, 75, 80, 82.5, 85, 87.5] as unknown as number,
+                        intensityPercent: [70, 75, 80, 82.5, 85, 87.5],
                         // RPE crescente (può variare indipendentemente)
-                        rpe: [7, 8, 8, 9, 9, 9] as unknown as number,
+                        rpe: [7, 8, 8, 9, 9, 9],
                         // Rest aumenta per serie più pesanti
-                        rest: [120, 150, 180, 180, 180, 240] as unknown as number,
-                      },
+                        rest: [120, 150, 180, 180, 180, 240],
+                      }),
                     },
                   ],
                 },
@@ -188,14 +195,14 @@ describe('Pyramid Sets - Test con Logging e JSON', () => {
                     {
                       id: 'sg_w1d1e1',
                       count: 6,
-                      baseSet: {
-                        reps: [10, 6, 6, 4, 3, 3] as unknown as number,
-                        weight: [60, 80, 80, 85, 90, 90] as unknown as number, // Coerente con pattern
+                      baseSet: makePyramidBaseSet({
+                        reps: [10, 6, 6, 4, 3, 3],
+                        weight: [60, 80, 80, 85, 90, 90], // Coerente con pattern
                         weightLbs: null,
-                        intensityPercent: [70, 80, 80, 82.5, 87.5, 87.5] as unknown as number,
-                        rpe: [7, 8, 8, 9, 9, 9] as unknown as number,
-                        rest: [120, 150, 150, 180, 180, 180] as unknown as number, // Set 5-6 hanno stesso rest per raggruppamento
-                      },
+                        intensityPercent: [70, 80, 80, 82.5, 87.5, 87.5],
+                        rpe: [7, 8, 8, 9, 9, 9],
+                        rest: [120, 150, 150, 180, 180, 180], // Set 5-6 hanno stesso rest per raggruppamento
+                      }),
                     },
                   ],
                 },
@@ -287,14 +294,14 @@ describe('Pyramid Sets - Test con Logging e JSON', () => {
                     {
                       id: 'sg_w1d1e1',
                       count: 5,
-                      baseSet: {
-                        reps: [5, 4, 3, 2, 1] as unknown as number,
-                        weight: [140, 150, 160, 170, 180] as unknown as number,
+                      baseSet: makePyramidBaseSet({
+                        reps: [5, 4, 3, 2, 1],
+                        weight: [140, 150, 160, 170, 180],
                         weightLbs: null,
                         intensityPercent: null, // Non usato
-                        rpe: [7, 8, 9, 9, 10] as unknown as number, // Usa RPE invece
-                        rest: [180, 240, 300, 300, 360] as unknown as number,
-                      },
+                        rpe: [7, 8, 9, 9, 10], // Usa RPE invece
+                        rest: [180, 240, 300, 300, 360],
+                      }),
                     },
                   ],
                 },

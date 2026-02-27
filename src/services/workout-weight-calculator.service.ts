@@ -1,4 +1,4 @@
-import { Prisma, type workout_programs } from '@prisma/client';
+import { type workout_programs } from '@prisma/client';
 import {
   prepareProgramForPersistence,
   normalizeWorkoutProgram,
@@ -210,8 +210,8 @@ export async function updateProgramWeightsForExerciseId(
     const likePattern = `%"catalogExerciseId":"${catalogExerciseId}"%`;
     log.debug(`[updateProgramWeightsForExerciseId] Searching programs with LIKE: ${likePattern}`);
 
-    const programs = await prisma.$queryRaw<Array<{ id: string; weeks: Prisma.JsonValue }>>`
-      SELECT id, weeks
+    const programs = await prisma.$queryRaw<workout_programs[]>`
+      SELECT *
       FROM workout_programs
       WHERE "userId" = ${userId}
         AND status = 'ACTIVE'
@@ -229,7 +229,7 @@ export async function updateProgramWeightsForExerciseId(
     const updatePromises = programs.map(async (program) => {
       log.debug(`[updateProgramWeightsForExerciseId] Processing program: ${program.id}`);
 
-      const normalizedProgram = normalizeWorkoutProgram(program as unknown as workout_programs);
+      const normalizedProgram = normalizeWorkoutProgram(program);
       let hasChanges = false;
       let exercisesUpdated = 0;
 

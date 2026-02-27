@@ -19,6 +19,12 @@ import type {
   ProgressionDiff,
   ExerciseSet,
 } from '@giulio-leone/schemas';
+import type { PyramidBaseSet } from './program-builder';
+
+/** Test helper: creates a baseSet with pyramid (array) fields typed as ExerciseSet */
+function makePyramidBaseSet(data: PyramidBaseSet): ExerciseSet {
+  return data as unknown as ExerciseSet;
+}
 
 describe('expandSetGroups', () => {
   it('should expand sets[] array from baseSet + count when sets is missing', () => {
@@ -804,14 +810,14 @@ describe('expandSetGroups with Pyramid/Variable Sets', () => {
                     {
                       id: 'sg_w1d1e1',
                       count: 6,
-                      baseSet: {
-                        reps: [10, 8, 6, 4, 4, 3] as unknown as number, // Pyramid reps
+                      baseSet: makePyramidBaseSet({
+                        reps: [10, 8, 6, 4, 4, 3], // Pyramid reps
                         weight: 100,
                         weightLbs: 220,
-                        intensityPercent: [70, 75, 80, 82.5, 85, 87.5] as unknown as number,
+                        intensityPercent: [70, 75, 80, 82.5, 85, 87.5],
                         rpe: 8,
                         rest: 120,
-                      },
+                      }),
                     },
                   ],
                 },
@@ -883,14 +889,14 @@ describe('expandSetGroups with Pyramid/Variable Sets', () => {
                     {
                       id: 'sg_w1d1e1',
                       count: 4,
-                      baseSet: {
-                        reps: [5, 4, 3, 2] as unknown as number, // Array
-                        weight: [140, 150, 160, 170] as unknown as number, // Array
+                      baseSet: makePyramidBaseSet({
+                        reps: [5, 4, 3, 2], // Array
+                        weight: [140, 150, 160, 170], // Array
                         weightLbs: null,
                         intensityPercent: 80, // Scalar - same for all
-                        rpe: [7, 8, 9, 9] as unknown as number, // Array
-                        rest: [180, 180, 240, 240] as unknown as number, // Array
-                      },
+                        rpe: [7, 8, 9, 9], // Array
+                        rest: [180, 180, 240, 240], // Array
+                      }),
                     },
                   ],
                 },
@@ -1024,14 +1030,14 @@ describe('expandSetGroupsWithAutoGroup', () => {
                     {
                       id: 'sg_w1d1e1',
                       count: 6,
-                      baseSet: {
-                        reps: [10, 6, 6, 4, 3, 3] as unknown as number,
+                      baseSet: makePyramidBaseSet({
+                        reps: [10, 6, 6, 4, 3, 3],
                         weight: 100,
                         weightLbs: 220,
-                        intensityPercent: [70, 80, 80, 82.5, 87.5, 87.5] as unknown as number,
+                        intensityPercent: [70, 80, 80, 82.5, 87.5, 87.5],
                         rpe: 8,
                         rest: 120,
-                      },
+                      }),
                     },
                   ],
                 },
@@ -1097,14 +1103,14 @@ describe('expandSetGroupsWithAutoGroup', () => {
                     {
                       id: 'sg_w1d1e1',
                       count: 6,
-                      baseSet: {
-                        reps: [10, 6, 6, 4, 3, 3] as unknown as number,
+                      baseSet: makePyramidBaseSet({
+                        reps: [10, 6, 6, 4, 3, 3],
                         weight: 100,
                         weightLbs: 220,
                         intensityPercent: 70,
                         rpe: 8,
                         rest: 120,
-                      },
+                      }),
                     },
                   ],
                 },

@@ -11,6 +11,13 @@ import {
   expandSetGroupsWithAutoGroup,
 } from './program-builder';
 import type { AIWorkoutProgram, WorkoutProgram, ProgressionDiff } from '@giulio-leone/schemas';
+import type { PyramidBaseSet } from './program-builder';
+import type { ExerciseSet } from '@giulio-leone/types/workout';
+
+/** Test helper: creates a baseSet with pyramid (array) fields typed as ExerciseSet */
+function makePyramidBaseSet(data: PyramidBaseSet): ExerciseSet {
+  return data as unknown as ExerciseSet;
+}
 
 // Helper per stampare JSON formattato
 function printJSON(label: string, data: unknown) {
@@ -386,15 +393,15 @@ describe('Visual Test - Costruzione JSON in Tempo Reale', () => {
                     {
                       id: 'sg_w1d1e1',
                       count: 6,
-                      baseSet: {
+                      baseSet: makePyramidBaseSet({
                         // Pattern: 10-6-6-4-3-3 (sets 2-3 e 5-6 sono identici!)
-                        reps: [10, 6, 6, 4, 3, 3] as unknown as number,
+                        reps: [10, 6, 6, 4, 3, 3],
                         weight: 100,
                         weightLbs: 220,
-                        intensityPercent: [70, 80, 80, 82.5, 87.5, 87.5] as unknown as number,
+                        intensityPercent: [70, 80, 80, 82.5, 87.5, 87.5],
                         rpe: 8,
                         rest: 120,
-                      },
+                      }),
                     },
                   ],
                 },

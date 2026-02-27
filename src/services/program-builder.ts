@@ -100,7 +100,7 @@ function expandPyramidSet(
 /**
  * Checks if baseSet contains any array fields (pyramid/variable)
  */
-function isPyramidBaseSet(baseSet: unknown): boolean {
+function isPyramidBaseSet(baseSet: unknown): baseSet is PyramidBaseSet {
   if (!baseSet || typeof baseSet !== 'object') return false;
   const fields = [
     'reps',
@@ -213,7 +213,7 @@ export function expandSetGroups(aiProgram: AIWorkoutProgram): WorkoutProgram {
                 .fill(null)
                 .map((_, index) =>
                   expandPyramidSet(
-                    setGroup.baseSet as unknown as PyramidBaseSet,
+                    setGroup.baseSet,
                     setGroup.count,
                     index
                   )
@@ -443,7 +443,7 @@ export function applyProgressionDiff(
         setGroup.sets = Array(setGroup.count)
           .fill(null)
           .map((_, index) =>
-            expandPyramidSet(setGroup.baseSet as unknown as PyramidBaseSet, setGroup.count, index)
+            expandPyramidSet(setGroup.baseSet, setGroup.count, index)
           );
       } else {
         setGroup.sets = Array(setGroup.count)
@@ -459,7 +459,7 @@ export function applyProgressionDiff(
         setGroup.sets = Array(setGroup.count)
           .fill(null)
           .map((_, index) =>
-            expandPyramidSet(setGroup.baseSet as unknown as PyramidBaseSet, setGroup.count, index)
+            expandPyramidSet(setGroup.baseSet, setGroup.count, index)
           );
       } else {
         setGroup.sets = Array(setGroup.count)

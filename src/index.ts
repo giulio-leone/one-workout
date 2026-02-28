@@ -42,6 +42,9 @@ export {
 // Periodization domain model & engine (M2-I1, M2-I2)
 export * from './periodization';
 
+// Adaptation pipeline (M3)
+export * from './adaptation';
+
 // Exercise services (merged from lib-exercise)
 export * from './exercise';
 

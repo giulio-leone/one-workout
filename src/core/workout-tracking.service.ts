@@ -9,12 +9,13 @@
  * Follows SOLID principles:
  * - Single Responsibility: Only manages workout session data
  * - Open/Closed: Extendable without modification
- * - Dependency Inversion: Depends on Prisma abstraction
+ * - Dependency Inversion: Depends on repository abstractions (Hexagonal)
  */
 
-import { prisma } from '@giulio-leone/lib-core';
+import { ServiceRegistry, REPO_TOKENS } from '@giulio-leone/core';
+import type { IWorkoutSessionRepository } from '@giulio-leone/core/repositories';
+import type { IWorkoutRepository } from '@giulio-leone/core/repositories';
 import { createId } from '@giulio-leone/lib-shared/id-generator';
-import { toPrismaJsonValue } from '@giulio-leone/lib-shared';
 import { mapToWorkoutSession, mapToWorkoutSessions } from './mappers/workout-session.mapper';
 import { hydrateSetGroups } from './helpers/utils/set-group-helpers';
 import { logger } from '@giulio-leone/lib-core';
@@ -25,6 +26,15 @@ import type {
   WorkoutProgramStats,
 } from '@giulio-leone/types/workout';
 import type { Exercise, SetGroup } from '@giulio-leone/types';
+
+/** Resolve repositories from the service registry */
+function getSessionRepo(): IWorkoutSessionRepository {
+  return ServiceRegistry.getInstance().resolve<IWorkoutSessionRepository>(REPO_TOKENS.WORKOUT_SESSION);
+}
+
+function getWorkoutRepo(): IWorkoutRepository {
+  return ServiceRegistry.getInstance().resolve<IWorkoutRepository>(REPO_TOKENS.WORKOUT);
+}
 
 /** Loose JSON structure for workout week from DB */
 interface JsonWeek {
@@ -64,20 +74,8 @@ export async function createWorkoutSession(
   try {
     // FIRST: Check if there's ANY session for this day (active or completed)
     // We enforce a strict "One Session Per Day" policy to prevent duplicates.
-    const existingSession = await prisma.workout_sessions.findFirst({
-      where: {
-        userId,
-        programId,
-        weekNumber,
-        dayNumber,
-        // We do NOT filter by completedAt: null anymore.
-        // If a session exists for this day, we return it.
-      },
-      orderBy: [
-        { completedAt: 'asc' }, // Prefer incomplete (null) sessions first if duplicates exist
-        { updatedAt: 'desc' }, // Then most recently updated
-      ],
-    });
+    const sessionRepo = getSessionRepo();
+    const existingSession = await sessionRepo.findForDay(userId, programId, weekNumber, dayNumber);
 
     if (existingSession) {
       const status = existingSession.completedAt ? 'COMPLETED' : 'ACTIVE';
@@ -96,9 +94,8 @@ export async function createWorkoutSession(
     logger.warn('[createWorkoutSession] No existing session found, creating new one');
 
     // Fetch the workout program to get the exercises for this day
-    const program = await prisma.workout_programs.findUnique({
-      where: { id: programId },
-    });
+    const workoutRepo = getWorkoutRepo();
+    const program = await workoutRepo.findById(programId);
 
     logger.warn('[createWorkoutSession] Program found:', { found: !!program });
 
@@ -176,17 +173,14 @@ export async function createWorkoutSession(
       : [];
 
     // Create session with exercises (tracking fields will be filled during workout)
-    const session = await prisma.workout_sessions.create({
-      data: {
-        id: createId(),
-        userId,
-        programId,
-        weekNumber,
-        dayNumber,
-        exercises: exercises as unknown as import('@prisma/client').Prisma.InputJsonValue,
-        notes,
-        updatedAt: new Date(),
-      },
+    const session = await sessionRepo.create({
+      id: createId(),
+      userId,
+      programId,
+      weekNumber,
+      dayNumber,
+      exercises,
+      notes,
     });
 
     logger.warn('[createWorkoutSession] Session created:', { sessionId: session.id });
@@ -206,9 +200,8 @@ export async function getWorkoutSession(
   sessionId: string,
   userId: string
 ): Promise<WorkoutSession | null> {
-  const session = await prisma.workout_sessions.findUnique({
-    where: { id: sessionId },
-  });
+  const sessionRepo = getSessionRepo();
+  const session = await sessionRepo.findById(sessionId);
 
   if (!session) {
     return null;
@@ -251,16 +244,8 @@ export async function getWorkoutSessions(
   programId?: string,
   limit?: number
 ): Promise<WorkoutSession[]> {
-  const sessions = await prisma.workout_sessions.findMany({
-    where: {
-      userId,
-      ...(programId && { programId }),
-    },
-    orderBy: {
-      startedAt: 'desc',
-    },
-    ...(limit && { take: limit }),
-  });
+  const sessionRepo = getSessionRepo();
+  const sessions = await sessionRepo.findByUser(userId, programId, limit);
 
   // Map Prisma entities to domain types
   return mapToWorkoutSessions(sessions);
@@ -319,16 +304,10 @@ export async function updateWorkoutSession(
     });
   }
 
-  const updated = await prisma.workout_sessions.update({
-    where: { id: sessionId },
-    data: {
-      ...(updates.exercises && {
-        exercises: toPrismaJsonValue(updates.exercises as unknown[]),
-      }),
-      ...(updates.completedAt !== undefined && { completedAt: updates.completedAt }),
-      ...(updates.notes !== undefined && { notes: updates.notes }),
-      updatedAt: new Date(),
-    },
+  const updated = await getSessionRepo().update(sessionId, {
+    ...(updates.exercises && { exercises: updates.exercises }),
+    ...(updates.completedAt !== undefined && { completedAt: updates.completedAt }),
+    ...(updates.notes !== undefined && { notes: updates.notes }),
   });
 
   // Map Prisma entity to domain type
@@ -345,9 +324,7 @@ export async function deleteWorkoutSession(sessionId: string, userId: string): P
     throw new Error('Sessione non trovata');
   }
 
-  await prisma.workout_sessions.delete({
-    where: { id: sessionId },
-  });
+  await getSessionRepo().delete(sessionId);
 }
 
 /**
@@ -359,12 +336,7 @@ export async function getWorkoutProgramStats(
   programId: string,
   userId: string
 ): Promise<WorkoutProgramStats> {
-  const sessions = await prisma.workout_sessions.findMany({
-    where: {
-      programId,
-      userId,
-    },
-  });
+  const sessions = await getSessionRepo().findByUser(userId, programId);
 
   const totalSessions = sessions.length;
   const completedSessions = sessions.filter((s: any) => s.completedAt !== null).length;
@@ -404,14 +376,7 @@ export async function hasSessionForDay(
   weekNumber: number,
   dayNumber: number
 ): Promise<boolean> {
-  const session = await prisma.workout_sessions.findFirst({
-    where: {
-      userId,
-      programId,
-      weekNumber,
-      dayNumber,
-    },
-  });
+  const session = await getSessionRepo().findForDay(userId, programId, weekNumber, dayNumber);
 
   return session !== null;
 }
@@ -428,18 +393,7 @@ export async function getActiveSessionForDay(
   weekNumber: number,
   dayNumber: number
 ): Promise<WorkoutSession | null> {
-  const session = await prisma.workout_sessions.findFirst({
-    where: {
-      userId,
-      programId,
-      weekNumber,
-      dayNumber,
-      completedAt: null, // Only incomplete sessions
-    },
-    orderBy: {
-      updatedAt: 'desc', // Most recently UPDATED first (active work)
-    },
-  });
+  const session = await getSessionRepo().findActiveForDay(userId, programId, weekNumber, dayNumber);
 
   if (!session) {
     return null;
@@ -463,15 +417,7 @@ export async function getLatestProgramSession(
   programId: string,
   userId: string
 ): Promise<WorkoutSession | null> {
-  const session = await prisma.workout_sessions.findFirst({
-    where: {
-      programId,
-      userId,
-    },
-    orderBy: {
-      startedAt: 'desc',
-    },
-  });
+  const session = await getSessionRepo().findLatest(programId, userId);
 
   if (!session) {
     return null;

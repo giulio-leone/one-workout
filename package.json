@@ -61,7 +61,8 @@
     "@giulio-leone/types": "workspace:*",
     "ai": "6.0.77",
     "xlsx": "^0.18.5",
-    "zod": "4.3.6"
+    "zod": "4.3.6",
+    "@giulio-leone/core": "workspace:*"
   },
   "peerDependencies": {
     "@prisma/client": ">=5.0.0"

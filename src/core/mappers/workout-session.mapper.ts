@@ -1,44 +1,52 @@
 /**
  * Workout Session Mapper
  *
- * Clean mapping functions between Prisma entities and domain types.
+ * Clean mapping functions between repository entities and domain types.
  * Follows SOLID principles: Single Responsibility for mapping logic.
  */
 
 import type { WorkoutSession, Exercise } from '@giulio-leone/types/workout';
 import { toExerciseArrayTyped } from '@giulio-leone/lib-shared';
-import type { workout_sessions } from '@prisma/client';
+
+/** Shape accepted by the mapper — compatible with both Prisma and repo types */
+interface SessionRecord {
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+  userId: string | null;
+  programId: string;
+  weekNumber: number;
+  dayNumber: number;
+  startedAt: Date;
+  completedAt: Date | null;
+  exercises: unknown;
+  notes: string | null;
+}
 
 /**
- * Maps Prisma workout_sessions entity to domain WorkoutSession
- *
- * @param prismaSession - Raw Prisma session entity
- * @returns Properly typed WorkoutSession domain object
+ * Maps a session record to domain WorkoutSession
  */
-export function mapToWorkoutSession(prismaSession: workout_sessions): WorkoutSession {
+export function mapToWorkoutSession(session: SessionRecord): WorkoutSession {
   return {
-    id: prismaSession.id,
-    createdAt: prismaSession.createdAt.toISOString(),
-    updatedAt: prismaSession.updatedAt.toISOString(),
-    userId: prismaSession.userId ?? '',
-    programId: prismaSession.programId,
-    weekNumber: prismaSession.weekNumber,
-    dayNumber: prismaSession.dayNumber,
-    startedAt: prismaSession.startedAt || new Date(),
-    completedAt: prismaSession.completedAt || null,
-    exercises: mapExercisesFromJson(prismaSession.exercises) as Exercise[],
-    notes: prismaSession.notes || undefined,
+    id: session.id,
+    createdAt: session.createdAt.toISOString(),
+    updatedAt: session.updatedAt.toISOString(),
+    userId: session.userId ?? '',
+    programId: session.programId,
+    weekNumber: session.weekNumber,
+    dayNumber: session.dayNumber,
+    startedAt: session.startedAt || new Date(),
+    completedAt: session.completedAt || null,
+    exercises: mapExercisesFromJson(session.exercises) as Exercise[],
+    notes: session.notes || undefined,
   };
 }
 
 /**
- * Maps array of Prisma sessions to domain WorkoutSessions
- *
- * @param prismaSessions - Array of raw Prisma session entities
- * @returns Array of properly typed WorkoutSession domain objects
+ * Maps array of session records to domain WorkoutSessions
  */
-export function mapToWorkoutSessions(prismaSessions: workout_sessions[]): WorkoutSession[] {
-  return prismaSessions.map(mapToWorkoutSession);
+export function mapToWorkoutSessions(sessions: SessionRecord[]): WorkoutSession[] {
+  return sessions.map(mapToWorkoutSession);
 }
 
 /**

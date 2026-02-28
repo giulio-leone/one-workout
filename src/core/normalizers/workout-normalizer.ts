@@ -5,10 +5,6 @@
  */
 
 import { DifficultyLevel, WorkoutStatus } from '@prisma/client';
-import type {
-  workout_programs as PrismaWorkoutProgram,
-  workout_program_versions as PrismaWorkoutProgramVersion,
-} from '@prisma/client';
 import type { WorkoutDay, WorkoutProgram, WorkoutWeek } from '@giulio-leone/types';
 import {
   ensureArray,
@@ -20,6 +16,23 @@ import {
 import { normalizeExercise } from './exercise-normalizer';
 
 type RawJson = Record<string, unknown>;
+
+/** Structural type accepted by normalizeWorkoutProgram – avoids coupling to Prisma models. */
+export interface WorkoutProgramLike {
+  id: string;
+  name: string;
+  description?: string | null;
+  difficulty?: unknown;
+  durationWeeks?: number | null;
+  goals?: unknown;
+  status?: unknown;
+  weeks?: unknown;
+  metadata?: unknown;
+  createdAt: Date | string | number;
+  updatedAt?: Date | string | number | null;
+  userId?: string | null;
+  version?: number | null;
+}
 
 /**
  * Normalizza il livello di difficoltà
@@ -169,7 +182,7 @@ export function normalizeMetadata(value: unknown): Record<string, unknown> | nul
  * Normalizza un workout program completo da Prisma
  */
 export function normalizeWorkoutProgram(
-  program: PrismaWorkoutProgram | PrismaWorkoutProgramVersion
+  program: WorkoutProgramLike
 ): WorkoutProgram {
   const weeks = parseWeeks(program.weeks).map((week, index) => normalizeWeek(week, index));
   const normalizedWeeks =

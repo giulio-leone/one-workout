@@ -6,7 +6,8 @@
  * - Operazioni batch (CRUD) e automazioni AI
  */
 
-import { prisma } from '@giulio-leone/lib-core';
+import { ServiceRegistry, REPO_TOKENS } from '@giulio-leone/core';
+import type { IExerciseRepository } from '@giulio-leone/core/repositories';
 import { ExerciseService } from './exercise.service';
 import { toSlug } from '@giulio-leone/lib-shared';
 import {
@@ -19,6 +20,11 @@ import {
 import { validateExerciseTypeByName } from '@giulio-leone/lib-core';
 
 import { z } from 'zod';
+
+function getExerciseRepo(): IExerciseRepository {
+  return ServiceRegistry.getInstance().resolve<IExerciseRepository>(REPO_TOKENS.EXERCISE);
+}
+
 type ExerciseApprovalStatus = 'APPROVED' | 'PENDING';
 type ExerciseRelationType = NonNullable<ExerciseRelationInput['relation']>;
 type MuscleRole = NonNullable<CreateExerciseInput['muscles']>[number]['role'];
@@ -155,36 +161,6 @@ export const exerciseAiPlanSchema = z.object({
   summary: z.string().optional(),
 });
 
-const EXERCISE_EXPORT_INCLUDE = {
-  exercise_translations: true,
-  exercise_types: true, // Include exerciseType relation to get the name
-  exercise_muscles: {
-    include: {
-      muscles: true,
-    },
-  },
-  exercise_body_parts: {
-    include: {
-      body_parts: true,
-    },
-  },
-  exercise_equipments: {
-    include: {
-      equipments: true,
-    },
-  },
-  relatedFrom: {
-    include: {
-      exercises_exercise_relations_toIdToexercises: {
-        select: {
-          id: true,
-          slug: true,
-        },
-      },
-    },
-  },
-} as const;
-
 export type ExerciseImportPayload = z.infer<typeof createExerciseSchema> & {
   approvalStatus?: ExerciseApprovalStatus;
 };
@@ -285,11 +261,9 @@ export class ExerciseAdminService {
   static async exportAll(
     options: { includeUnapproved?: boolean } = {}
   ): Promise<ExerciseExportRecord[]> {
-    const exercises = await prisma.exercises.findMany({
-      where: options.includeUnapproved ? {} : { approvalStatus: DEFAULT_APPROVED_STATUS },
-      include: EXERCISE_EXPORT_INCLUDE,
-      orderBy: { createdAt: 'asc' },
-    });
+    const exercises = await getExerciseRepo().findAllExercisesForExport(
+      options.includeUnapproved ? {} : { approvalStatus: DEFAULT_APPROVED_STATUS }
+    );
 
     return exercises.map((exercise: any) => this.formatExportRecord(exercise));
   }
@@ -339,10 +313,8 @@ export class ExerciseAdminService {
           relationAdditions
         );
 
-        const existing = await prisma.exercises.findUnique({
-          where: { slug: record.slug },
-          select: { id: true, approvalStatus: true },
-        });
+        const existing = await getExerciseRepo().findExerciseBySlug(record.slug) as
+          { id: string; approvalStatus: string } | null;
 
         if (!existing) {
           const targetStatus =
@@ -463,10 +435,7 @@ export class ExerciseAdminService {
     let exerciseTypeId: string;
 
     // Verifica se è un ID valido nel database
-    const existingType = await prisma.exercise_types.findUnique({
-      where: { id: providedId },
-      select: { id: true },
-    });
+    const existingType = await getExerciseRepo().findExerciseTypeById(providedId);
 
     if (existingType) {
       // È un ID valido
@@ -577,10 +546,8 @@ export class ExerciseAdminService {
       let targetId = cachedId;
 
       if (!targetId) {
-        const existing = await prisma.exercises.findUnique({
-          where: { slug: relation.slug },
-          select: { id: true },
-        });
+        const existing = await getExerciseRepo().findExerciseBySlug(relation.slug) as
+          { id: string } | null;
         if (existing) {
           targetId = existing.id;
           slugCache.set(relation.slug, existing.id);

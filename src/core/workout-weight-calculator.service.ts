@@ -14,12 +14,12 @@ import type {
   SetGroup,
 } from '@giulio-leone/types';
 import { OneRepMaxService } from '../exercise/one-rep-max.service';
-import { prisma } from '@giulio-leone/lib-core';
+import { ServiceRegistry, REPO_TOKENS } from '@giulio-leone/core';
+import type { IWorkoutRepository } from '@giulio-leone/core/repositories';
 import { userProfileService } from '@giulio-leone/lib-core/user-profile.service';
 import { prepareProgramForPersistence } from './transformers/program-transform';
 import { normalizeWorkoutProgram } from './normalizers/workout-normalizer';
 import { calculateSetWeights } from './calculators/weight-calculator';
-import { toPrismaJsonValue } from '@giulio-leone/lib-shared';
 
 import { logger } from '@giulio-leone/lib-core';
 
@@ -29,6 +29,11 @@ import { logger } from '@giulio-leone/lib-core';
  * @param program - Programma di allenamento
  * @returns Programma con pesi calcolati
  */
+
+function getWorkoutRepo() {
+  return ServiceRegistry.getInstance().resolve<IWorkoutRepository>(REPO_TOKENS.WORKOUT);
+}
+
 export async function calculateWeightsInProgram(
   userId: string,
   program: WorkoutProgram
@@ -117,14 +122,8 @@ export async function updateProgramWeightsForExerciseId(
 ): Promise<void> {
   try {
     // Trova tutti i programmi ACTIVE dell'utente
-    const programs = await prisma.workout_programs.findMany({
-      where: {
-        userId,
-        status: {
-          in: ['ACTIVE', 'DRAFT'],
-        },
-      },
-    });
+    const programs = (await getWorkoutRepo().findMany({ userId }))
+      .filter((p) => p.status === 'ACTIVE' || p.status === 'DRAFT');
 
     // Per ogni programma, aggiorna i pesi se necessario
     for (const program of programs) {
@@ -153,12 +152,9 @@ export async function updateProgramWeightsForExerciseId(
         const persistence = prepareProgramForPersistence(updatedProgram);
 
         // Aggiorna il programma nel database
-        await prisma.workout_programs.update({
-          where: { id: program.id },
-          data: {
-            weeks: toPrismaJsonValue(persistence.weeks as unknown[]),
-            updatedAt: new Date(),
-          },
+        await getWorkoutRepo().update(program.id, {
+          weeks: persistence.weeks as unknown[],
+          updatedAt: new Date(),
         });
       }
     }

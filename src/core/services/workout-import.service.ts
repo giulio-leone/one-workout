@@ -1,5 +1,6 @@
-import { prisma } from '@giulio-leone/lib-core';
-import { createId, toPrismaJsonValue } from '@giulio-leone/lib-shared/utils';
+import { ServiceRegistry, REPO_TOKENS } from '@giulio-leone/core';
+import type { IWorkoutRepository } from '@giulio-leone/core/repositories';
+import { createId } from '@giulio-leone/lib-shared/utils';
 import type {
   WorkoutProgram,
   WorkoutWeek,
@@ -126,6 +127,10 @@ export class WorkoutImportService extends BaseImportService<
 > {
   protected getLoggerName(): string {
     return 'WorkoutImportService';
+  }
+
+  private static getWorkoutRepo() {
+    return ServiceRegistry.getInstance().resolve<IWorkoutRepository>(REPO_TOKENS.WORKOUT);
   }
 
   // Override validateFiles to add domain-specific checks
@@ -389,22 +394,17 @@ export class WorkoutImportService extends BaseImportService<
       throw new Error('Workout program conversion failed: workoutProgram is undefined');
     }
 
-    const result = await prisma.workout_programs.create({
-      data: {
-        id: workoutProgram.id,
-        userId,
-        name: workoutProgram.name,
-        description: workoutProgram.description,
-        difficulty: workoutProgram.difficulty,
-        durationWeeks: workoutProgram.durationWeeks,
-        goals: workoutProgram.goals,
-        status: workoutProgram.status,
-        weeks: toPrismaJsonValue(workoutProgram.weeks),
-        metadata: toPrismaJsonValue(workoutProgram.metadata),
-        version: workoutProgram.version || 1,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
+    const result = await WorkoutImportService.getWorkoutRepo().create({
+      id: workoutProgram.id,
+      name: workoutProgram.name,
+      description: workoutProgram.description,
+      difficulty: workoutProgram.difficulty,
+      durationWeeks: workoutProgram.durationWeeks,
+      goals: workoutProgram.goals,
+      status: workoutProgram.status,
+      weeks: workoutProgram.weeks,
+      metadata: workoutProgram.metadata,
+      userId,
     });
 
     FileValidatorService.incrementRateLimit(userId);

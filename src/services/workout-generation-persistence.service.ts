@@ -7,11 +7,10 @@
  * Single Responsibility: Database persistence only
  */
 
-import { prisma } from '@giulio-leone/lib-core';
+import { ServiceRegistry, REPO_TOKENS } from '@giulio-leone/core';
+import type { IWorkoutRepository } from '@giulio-leone/core/repositories';
 import {
   createId,
-  toPrismaJsonValue,
-  toNullablePrismaJsonValue,
   toWorkoutProgram,
 } from '@giulio-leone/lib-shared';
 import { mapDifficulty } from './workout-generation-mapper';
@@ -35,6 +34,10 @@ export interface SaveWorkoutProgramResult {
 }
 
 export class WorkoutGenerationPersistenceService {
+  private static getWorkoutRepo() {
+    return ServiceRegistry.getInstance().resolve<IWorkoutRepository>(REPO_TOKENS.WORKOUT);
+  }
+
   /**
    * Save workout program to database
    * Includes weight calculation and data preparation
@@ -75,23 +78,17 @@ export class WorkoutGenerationPersistenceService {
 
       // Save to database
       logger?.info('STEP4', 'Saving to database...');
-      await prisma.workout_programs.create({
-        data: {
-          id: programId,
-          userId,
-          name: persistence.name,
-          description: persistence.description,
-          difficulty: fullProgram.difficulty,
-          durationWeeks: persistence.durationWeeks,
-          goals: persistence.goals,
-          weeks: toPrismaJsonValue(persistence.weeks as unknown[]),
-          status: persistence.status,
-          metadata: toNullablePrismaJsonValue(
-            (persistence.metadata ?? {}) as Record<string, unknown>
-          ),
-          createdAt: now,
-          updatedAt: now,
-        },
+      await WorkoutGenerationPersistenceService.getWorkoutRepo().create({
+        id: programId,
+        userId,
+        name: persistence.name,
+        description: persistence.description,
+        difficulty: fullProgram.difficulty,
+        durationWeeks: persistence.durationWeeks,
+        goals: persistence.goals,
+        weeks: persistence.weeks,
+        status: persistence.status,
+        metadata: persistence.metadata ?? {},
       });
 
       logger?.info('STEP4', '✅ Program saved successfully', { programId });

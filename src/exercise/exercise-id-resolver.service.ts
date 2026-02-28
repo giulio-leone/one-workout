@@ -6,7 +6,8 @@
  * displayed with localized names in the frontend.
  */
 
-import { prisma } from '@giulio-leone/lib-core';
+import { ServiceRegistry, REPO_TOKENS } from '@giulio-leone/core';
+import type { IExerciseRepository } from '@giulio-leone/core/repositories';
 import { SimpleCache } from '@giulio-leone/lib-shared';
 
 const DEFAULT_LOCALE = 'en';
@@ -24,6 +25,10 @@ const exerciseCache = new SimpleCache<string, Record<string, ExerciseIdInfo>>({
   max: 200,
   ttl: CACHE_TTL_MS,
 });
+
+function getExerciseRepo() {
+  return ServiceRegistry.getInstance().resolve<IExerciseRepository>(REPO_TOKENS.EXERCISE);
+}
 
 /**
  * Build cache key from exercise IDs and locale
@@ -48,22 +53,10 @@ export async function resolveExerciseIds(
   const cached = exerciseCache.get(cacheKey);
   if (cached) return cached;
 
-  const exercises = await prisma.exercises.findMany({
-    where: { id: { in: ids } },
-    select: {
-      id: true,
-      slug: true,
-      exercise_translations: {
-        where: {
-          OR: [{ locale }, { locale: DEFAULT_LOCALE }],
-        },
-        select: {
-          locale: true,
-          name: true,
-        },
-      },
-    },
-  });
+  const exercises = await getExerciseRepo().findExercisesByIdsWithTranslations(
+    ids,
+    [locale, DEFAULT_LOCALE]
+  );
 
   const result: Record<string, ExerciseIdInfo> = {};
 

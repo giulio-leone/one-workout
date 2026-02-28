@@ -1,4 +1,5 @@
-import { prisma } from '@giulio-leone/lib-core';
+import { ServiceRegistry, REPO_TOKENS } from '@giulio-leone/core';
+import type { IExerciseRepository, ExerciseSearchFilters } from '@giulio-leone/core/repositories';
 import { createId, toSlug } from '@giulio-leone/lib-shared/utils';
 import type {
   CreateExerciseInput,
@@ -7,11 +8,14 @@ import type {
   ExerciseTranslationInput,
   UpdateExerciseInput,
 } from '@giulio-leone/schemas/exercise';
-import { ExerciseApprovalStatus, ExerciseRelationType, MuscleRole, Prisma } from '@prisma/client';
 import type { LocalizedExercise, ExerciseTranslationView } from '@giulio-leone/types';
 import type { Operation } from 'fast-json-patch';
 import { compare } from 'fast-json-patch';
-import { SimpleCache, toPrismaJsonValue } from '@giulio-leone/lib-shared';
+import { SimpleCache } from '@giulio-leone/lib-shared';
+
+function getExerciseRepo(): IExerciseRepository {
+  return ServiceRegistry.getInstance().resolve<IExerciseRepository>(REPO_TOKENS.EXERCISE);
+}
 
 const DEFAULT_LOCALE = 'en';
 // Cache disabilitata per debug e consistenza dati
@@ -19,95 +23,89 @@ const LIST_CACHE_TTL_MS = 0;
 const EXERCISE_CACHE_TTL_MS = 1000 * 60 * 10; // 10 minuti
 const MAX_LIST_PAGE_SIZE = 100;
 
-const EXERCISE_INCLUDE = {
-  exercise_translations: true,
-  exercise_types: true, // Include per ottenere il nome
-  exercise_muscles: {
-    include: {
-      muscles: true,
-    },
-  },
-  exercise_body_parts: {
-    include: {
-      body_parts: true,
-    },
-  },
-  exercise_equipments: {
-    include: {
-      equipments: true,
-    },
-  },
-  relatedFrom: {
-    include: {
-      exercises_exercise_relations_toIdToexercises: {
-        select: {
-          id: true,
-          slug: true,
-        },
-      },
-    },
-  },
-  relatedTo: {
-    include: {
-      exercises_exercise_relations_fromIdToexercises: {
-        select: {
-          id: true,
-          slug: true,
-        },
-      },
-    },
-  },
-} satisfies Prisma.exercisesInclude;
+// Internal types matching the shape returned by the repository
+interface ExerciseTranslationRow {
+  locale: string;
+  name: string;
+  shortName: string | null;
+  description: string | null;
+  searchTerms: string[];
+}
 
-// Selezione ottimizzata per la lista
-const EXERCISE_LIST_SELECT = {
-  id: true,
-  slug: true,
-  exerciseTypeId: true,
-  approvalStatus: true,
-  approvedAt: true,
-  isUserGenerated: true,
-  version: true,
-  imageUrl: true,
-  videoUrl: true,
-  overview: true,
-  keywords: true,
-  // Campi pesanti esclusi: instructions, exerciseTips, variations
-  exercise_translations: {
-    select: {
-      locale: true,
-      name: true,
-      shortName: true,
-      // description e searchTerms esclusi se non necessari
-    },
-  },
-  exercise_types: {
-    select: { name: true },
-  },
-  exercise_muscles: {
-    select: {
-      role: true,
-      muscleId: true,
-      muscles: { select: { name: true, slug: true } },
-    },
-  },
-  exercise_equipments: {
-    select: {
-      equipmentId: true,
-      equipments: { select: { name: true, slug: true } },
-    },
-  },
-  exercise_body_parts: {
-    select: {
-      bodyPartId: true,
-      body_parts: { select: { name: true, slug: true } },
-    },
-  },
-} satisfies Prisma.exercisesSelect;
+interface ExerciseWithRelations {
+  id: string;
+  slug: string;
+  exerciseTypeId: string | null;
+  overview: string | null;
+  imageUrl: string | null;
+  videoUrl: string | null;
+  keywords: string[];
+  instructions: string[];
+  exerciseTips: string[];
+  variations: string[];
+  approvalStatus: string;
+  approvedAt: Date | null;
+  isUserGenerated: boolean;
+  version: number;
+  exercise_translations: ExerciseTranslationRow[];
+  exercise_types: { name: string } | null;
+  exercise_muscles: Array<{
+    muscleId: string;
+    role: string;
+    muscles: { name: string; slug: string } | null;
+  }>;
+  exercise_body_parts: Array<{
+    bodyPartId: string;
+    body_parts: { name: string; slug: string } | null;
+  }>;
+  exercise_equipments: Array<{
+    equipmentId: string;
+    equipments: { name: string; slug: string } | null;
+  }>;
+  relatedFrom: Array<{
+    toId: string;
+    relation: string;
+    exercises_exercise_relations_toIdToexercises?: { id: string; slug: string } | null;
+  }>;
+  relatedTo: Array<{
+    fromId: string;
+    relation: string;
+    exercises_exercise_relations_fromIdToexercises?: { id: string; slug: string } | null;
+  }>;
+}
 
-type ExerciseWithRelations = Prisma.exercisesGetPayload<{ include: typeof EXERCISE_INCLUDE }>;
-type ExerciseListRow = Prisma.exercisesGetPayload<{ select: typeof EXERCISE_LIST_SELECT }>;
-type TransactionClient = Prisma.TransactionClient;
+interface ExerciseListRow {
+  id: string;
+  slug: string;
+  exerciseTypeId: string | null;
+  approvalStatus: string;
+  approvedAt: Date | null;
+  isUserGenerated: boolean;
+  version: number;
+  imageUrl: string | null;
+  videoUrl: string | null;
+  overview: string | null;
+  keywords: string[];
+  exercise_translations: Array<{
+    locale: string;
+    name: string;
+    shortName: string | null;
+  }>;
+  exercise_types: { name: string } | null;
+  exercise_muscles: Array<{
+    role: string;
+    muscleId: string;
+    muscles: { name: string; slug: string } | null;
+  }>;
+  exercise_equipments: Array<{
+    equipmentId: string;
+    equipments: { name: string; slug: string } | null;
+  }>;
+  exercise_body_parts: Array<{
+    bodyPartId: string;
+    body_parts: { name: string; slug: string } | null;
+  }>;
+}
 
 interface ExerciseSnapshot {
   slug: string;
@@ -119,7 +117,7 @@ interface ExerciseSnapshot {
   instructions: string[];
   exerciseTips: string[];
   variations: string[];
-  approvalStatus: ExerciseApprovalStatus;
+  approvalStatus: string;
   isUserGenerated: boolean;
   translations: Record<
     string,
@@ -132,13 +130,13 @@ interface ExerciseSnapshot {
   >;
   muscles: Array<{
     id: string; // ID instead of name
-    role: MuscleRole;
+    role: string;
   }>;
   bodyParts: string[]; // IDs
   equipments: string[]; // IDs
   relatedFrom: Array<{
     toId: string;
-    relation: ExerciseRelationType;
+    relation: string;
   }>;
 }
 
@@ -160,12 +158,6 @@ type ExerciseListResult = Omit<ExercisesResponse, 'data'> & {
   pageSize: number;
   total: number;
 };
-
-interface SearchResultRow {
-  id: string;
-  rank: number;
-  has_locale: boolean;
-}
 
 const listCache = new SimpleCache<string, ExerciseListResult>({
   max: 200,
@@ -200,7 +192,19 @@ export class ExerciseService {
     const { locale, page, pageSize, search, includeTranslations: _includeTranslations, ...filters } = sanitized;
 
     if (search) {
-      const total = await this.countSearchFullText(search, { locale, filters });
+      const repo = getExerciseRepo();
+      const searchFilters: ExerciseSearchFilters = {
+        includeUnapproved: filters.includeUnapproved,
+        approvalStatus: filters.approvalStatus,
+        exerciseTypeId: filters.exerciseTypeId,
+        muscleIds: filters.muscleIds,
+        bodyPartIds: filters.bodyPartIds,
+        equipmentIds: filters.equipmentIds,
+      };
+      const total = await repo.countSearchExercisesFullText(search, {
+        locale,
+        filters: searchFilters,
+      });
 
       if (total === 0) {
         return {
@@ -211,21 +215,16 @@ export class ExerciseService {
         };
       }
 
-      const searchResults = await this.searchFullText(search, {
+      const searchResults = await repo.searchExercisesFullText(search, {
         locale,
         limit: pageSize,
         offset: (page - 1) * pageSize,
-        filters,
+        filters: searchFilters,
       });
 
       const pageIds = searchResults.map((row: any) => row.id);
 
-      const exercises = await prisma.exercises.findMany({
-        where: {
-          id: { in: pageIds },
-        },
-        select: EXERCISE_LIST_SELECT,
-      });
+      const exercises = await repo.findExercisesByIdsForList(pageIds);
 
       const exerciseById = new Map(exercises.map((exercise: any) => [exercise.id, exercise]));
       const localized = pageIds
@@ -246,16 +245,11 @@ export class ExerciseService {
     }
 
     const where = this.buildWhereClause(filters);
-    const [total, exercises] = await prisma.$transaction([
-      prisma.exercises.count({ where }),
-      prisma.exercises.findMany({
-        where,
-        select: EXERCISE_LIST_SELECT,
-        orderBy: { createdAt: 'desc' },
-        skip: (page - 1) * pageSize,
-        take: pageSize,
-      }),
-    ]);
+    const { count: total, items: exercises } = await getExerciseRepo().findExercisesPage(
+      where,
+      (page - 1) * pageSize,
+      pageSize,
+    );
 
     const data = exercises.map((exercise: any) => this.mapListRowToLocalized(exercise, locale));
 
@@ -279,11 +273,20 @@ export class ExerciseService {
       ...options,
       search: term,
     });
-    const searchResults = await this.searchFullText(term, {
+    const repo = getExerciseRepo();
+    const searchFilters: ExerciseSearchFilters = {
+      includeUnapproved: filters.includeUnapproved,
+      approvalStatus: filters.approvalStatus,
+      exerciseTypeId: filters.exerciseTypeId,
+      muscleIds: filters.muscleIds,
+      bodyPartIds: filters.bodyPartIds,
+      equipmentIds: filters.equipmentIds,
+    };
+    const searchResults = await repo.searchExercisesFullText(term, {
       locale,
       limit: pageSize,
       offset: (page - 1) * pageSize,
-      filters,
+      filters: searchFilters,
     });
 
     // Note: search() method returns just the paginated slice as LocalizedExercise[] without total count
@@ -296,10 +299,7 @@ export class ExerciseService {
     }
 
     // Usa select ottimizzata anche per la ricerca
-    const exercises = await prisma.exercises.findMany({
-      where: { id: { in: pageIds } },
-      select: EXERCISE_LIST_SELECT,
-    });
+    const exercises = await repo.findExercisesByIdsForList(pageIds);
 
     const exerciseById = new Map(exercises.map((exercise: any) => [exercise.id, exercise]));
 
@@ -319,23 +319,21 @@ export class ExerciseService {
     const cacheKey = this.buildExerciseCacheKey(id, normalizedLocale, includeTranslations);
     const cached = exerciseCache.get(cacheKey);
     if (cached) {
-      if (options.includeUnapproved || cached.approvalStatus === ExerciseApprovalStatus.APPROVED) {
+      if (options.includeUnapproved || cached.approvalStatus === 'APPROVED') {
         return cached;
       }
       exerciseCache.delete(cacheKey);
     }
 
-    const exercise = await prisma.exercises.findUnique({
-      where: {
-        id,
-        ...(options.includeUnapproved ? {} : { approvalStatus: ExerciseApprovalStatus.APPROVED }),
-      },
-      include: EXERCISE_INCLUDE,
+    const raw = await getExerciseRepo().findExerciseWithRelations({
+      id,
+      ...(options.includeUnapproved ? {} : { approvalStatus: 'APPROVED' }),
     });
 
-    if (!exercise) {
+    if (!raw) {
       return null;
     }
+    const exercise = raw as unknown as ExerciseWithRelations;
 
     const localized = this.mapExerciseToLocalized(exercise, normalizedLocale, includeTranslations);
     exerciseCache.set(cacheKey, localized);
@@ -350,17 +348,15 @@ export class ExerciseService {
     const normalizedLocale = this.normalizeLocale(locale);
     const includeTranslations = options.includeTranslations ?? false;
 
-    const exercise = await prisma.exercises.findUnique({
-      where: {
-        slug,
-        ...(options.includeUnapproved ? {} : { approvalStatus: ExerciseApprovalStatus.APPROVED }),
-      },
-      include: EXERCISE_INCLUDE,
+    const raw = await getExerciseRepo().findExerciseWithRelations({
+      slug,
+      ...(options.includeUnapproved ? {} : { approvalStatus: 'APPROVED' }),
     });
 
-    if (!exercise) {
+    if (!raw) {
       return null;
     }
+    const exercise = raw as unknown as ExerciseWithRelations;
 
     const localized = this.mapExerciseToLocalized(exercise, normalizedLocale, includeTranslations);
     const cacheKey = this.buildExerciseCacheKey(exercise.id, normalizedLocale, includeTranslations);
@@ -374,32 +370,25 @@ export class ExerciseService {
   ): Promise<LocalizedExercise> {
     const data = this.prepareCreateData(payload, options);
 
-    const result = await prisma.$transaction(async (tx: any) => {
-      const created = await tx.exercises.create({
-        data: {
-          ...data.exercise,
-          exercise_translations: { create: data.translations },
-          exercise_muscles: { createMany: { data: data.muscles } },
-          exercise_body_parts: { createMany: { data: data.bodyParts, skipDuplicates: true } },
-          exercise_equipments: { createMany: { data: data.equipments, skipDuplicates: true } },
-        },
-        include: EXERCISE_INCLUDE,
-      });
+    const result = await getExerciseRepo().createExerciseWithRelationsTx({
+      exerciseData: {
+        ...data.exercise,
+        exercise_translations: { create: data.translations },
+        exercise_muscles: { createMany: { data: data.muscles } },
+        exercise_body_parts: { createMany: { data: data.bodyParts, skipDuplicates: true } },
+        exercise_equipments: { createMany: { data: data.equipments, skipDuplicates: true } },
+      },
+      related: data.related,
+    });
 
-      if (data.related.length > 0) {
-        await tx.exercise_relations.createMany({ data: data.related });
-      }
-
-      const snapshot = this.buildSnapshot(created);
-      await this.recordVersion(tx, created.id, created.version, null, snapshot, options.userId, {
-        event: 'CREATE',
-      });
-
-      return created;
+    const created = result as unknown as ExerciseWithRelations;
+    const snapshot = this.buildSnapshot(created);
+    await this.recordVersion(created.id, created.version, null, snapshot, options.userId, {
+      event: 'CREATE',
     });
 
     this.invalidateCaches();
-    return this.mapExerciseToLocalized(result, DEFAULT_LOCALE, false);
+    return this.mapExerciseToLocalized(created, DEFAULT_LOCALE, false);
   }
 
   static async update(
@@ -409,137 +398,83 @@ export class ExerciseService {
   ): Promise<LocalizedExercise> {
     const normalizedLocale = this.normalizeLocale(options.locale ?? DEFAULT_LOCALE);
 
-    const result = await prisma.$transaction(async (tx: any) => {
-      const existing = await tx.exercises.findUnique({
-        where: { id },
-        include: EXERCISE_INCLUDE,
+    const repo = getExerciseRepo();
+
+    // Fetch existing for prepareUpdateData (needs approvalStatus)
+    const existingRaw = await repo.findExerciseWithRelations({ id });
+    if (!existingRaw) {
+      throw new Error('Exercise non trovato');
+    }
+    const existing = existingRaw as unknown as ExerciseWithRelations;
+    const updateData = this.prepareUpdateData(payload, existing, options.userId);
+
+    // Prepare translation operations for the repository
+    let translationUpserts:
+      | Array<{
+          where: Record<string, unknown>;
+          create: Record<string, unknown>;
+          update: Record<string, unknown>;
+        }>
+      | undefined;
+    let translationDeleteWhere: Record<string, unknown> | undefined;
+
+    if (updateData.translations) {
+      // Deduplicate translations by locale (keep first occurrence)
+      const seenLocales = new Set<string>();
+      const uniqueTranslations = updateData.translations.filter((translation: any) => {
+        const locale = translation.locale.toLowerCase();
+        if (seenLocales.has(locale)) {
+          logger.warn(
+            `[ExerciseService] Duplicate translation locale "${locale}" removed during update for exercise "${id}"`
+          );
+          return false;
+        }
+        seenLocales.add(locale);
+        return true;
       });
 
-      if (!existing) {
-        throw new Error('Exercise non trovato');
-      }
+      const locales = uniqueTranslations.map((translation: any) => translation.locale);
+      translationUpserts = uniqueTranslations.map((translation: any) => ({
+        where: { exerciseId_locale: { exerciseId: id, locale: translation.locale } },
+        create: {
+          id: createId(),
+          exerciseId: id,
+          ...translation,
+          updatedAt: new Date(),
+        },
+        update: {
+          name: translation.name,
+          shortName: translation.shortName ?? null,
+          description: translation.description ?? null,
+          searchTerms: translation.searchTerms,
+        },
+      }));
+      translationDeleteWhere = { exerciseId: id, locale: { notIn: locales } };
+    }
 
-      const previousSnapshot = this.buildSnapshot(existing);
-      const updateData = this.prepareUpdateData(payload, existing, options.userId);
-
-      if (updateData.exercise) {
-        await tx.exercises.update({
-          where: { id },
-          data: updateData.exercise,
-        });
-      }
-
-      if (updateData.translations) {
-        // Deduplicate translations by locale (keep first occurrence)
-        const seenLocales = new Set<string>();
-        const uniqueTranslations = updateData.translations.filter((translation: any) => {
-          const locale = translation.locale.toLowerCase();
-          if (seenLocales.has(locale)) {
-            logger.warn(
-              `[ExerciseService] Duplicate translation locale "${locale}" removed during update for exercise "${id}"`
-            );
-            return false;
-          }
-          seenLocales.add(locale);
-          return true;
-        });
-
-        const locales = uniqueTranslations.map((translation: any) => translation.locale);
-        await Promise.all(
-          uniqueTranslations.map((translation: any) =>
-            tx.exercise_translations.upsert({
-              where: {
-                exerciseId_locale: {
-                  exerciseId: id,
-                  locale: translation.locale,
-                },
-              },
-              create: {
-                id: createId(),
-                exerciseId: id,
-                ...translation,
-                updatedAt: new Date(),
-              },
-              update: {
-                name: translation.name,
-                shortName: translation.shortName ?? null,
-                description: translation.description ?? null,
-                searchTerms: translation.searchTerms,
-              },
-            })
-          )
-        );
-
-        await tx.exercise_translations.deleteMany({
-          where: {
-            exerciseId: id,
-            locale: { notIn: locales },
-          },
-        });
-      }
-
-      if (updateData.muscles) {
-        await tx.exercise_muscles.deleteMany({ where: { exerciseId: id } });
-        if (updateData.muscles.length) {
-          await tx.exercise_muscles.createMany({ data: updateData.muscles });
-        }
-      }
-
-      if (updateData.bodyParts) {
-        await tx.exercise_body_parts.deleteMany({ where: { exerciseId: id } });
-        if (updateData.bodyParts.length) {
-          await tx.exercise_body_parts.createMany({
-            data: updateData.bodyParts,
-            skipDuplicates: true,
-          });
-        }
-      }
-
-      if (updateData.equipments) {
-        await tx.exercise_equipments.deleteMany({ where: { exerciseId: id } });
-        if (updateData.equipments.length) {
-          await tx.exercise_equipments.createMany({
-            data: updateData.equipments,
-            skipDuplicates: true,
-          });
-        }
-      }
-
-      if (updateData.related) {
-        await tx.exercise_relations.deleteMany({ where: { fromId: id } });
-        if (updateData.related.length) {
-          await tx.exercise_relations.createMany({ data: updateData.related });
-        }
-      }
-
-      const updated = await tx.exercises.findUnique({
-        where: { id },
-        include: EXERCISE_INCLUDE,
-      });
-
-      if (!updated) {
-        throw new Error("Errore nell'aggiornamento dell'esercizio");
-      }
-
-      const snapshot = this.buildSnapshot(updated);
-      const diff = compare(previousSnapshot, snapshot) as Operation[];
-      const baseVersion = updated.version;
-      const newVersion = baseVersion + 1;
-
-      await tx.exercises.update({
-        where: { id },
-        data: { version: newVersion },
-      });
-
-      await this.recordVersion(tx, id, newVersion, previousSnapshot, snapshot, options.userId, {
-        event: 'UPDATE',
-        changes: diff.length,
-      });
-
-      // Ottimizzazione: evitiamo una terza query pesante
-      // Aggiorniamo manualmente la versione nell'oggetto già recuperato
-      return { ...updated, version: newVersion };
+    const { previous, updated } = await repo.updateExerciseWithRelationsTx(id, {
+      exerciseUpdate: updateData.exercise ?? undefined,
+      translationUpserts,
+      translationDeleteWhere,
+      muscleItems: updateData.muscles,
+      bodyPartItems: updateData.bodyParts,
+      equipmentItems: updateData.equipments,
+      relationItems: updateData.related,
     });
+
+    // Record version
+    const prev = previous as unknown as ExerciseWithRelations;
+    const upd = updated as unknown as ExerciseWithRelations;
+    const previousSnapshot = this.buildSnapshot(prev);
+    const snapshot = this.buildSnapshot(upd);
+    const diff = compare(previousSnapshot, snapshot) as Operation[];
+
+    await this.recordVersion(id, upd.version, previousSnapshot, snapshot, options.userId, {
+      event: 'UPDATE',
+      changes: diff.length,
+    });
+
+    const result = upd;
 
     this.invalidateCaches();
     return this.mapExerciseToLocalized(
@@ -551,65 +486,44 @@ export class ExerciseService {
 
   static async setApprovalStatus(
     id: string,
-    status: ExerciseApprovalStatus,
+    status: string,
     options: { userId: string }
   ): Promise<LocalizedExercise> {
-    const result = await prisma.$transaction(async (tx: any) => {
-      const existing = await tx.exercises.findUnique({
-        where: { id },
-        include: EXERCISE_INCLUDE,
-      });
+    const isApproved = status === 'APPROVED';
+    const approvedAt = isApproved ? new Date() : null;
+    const approvedById = isApproved ? options.userId : null;
 
-      if (!existing) {
-        throw new Error('Exercise non trovato');
-      }
-
-      const previousSnapshot = this.buildSnapshot(existing);
-
-      const isApproved = status === ExerciseApprovalStatus.APPROVED;
-      const approvedAt = isApproved ? new Date() : null;
-      const approvedById = isApproved ? options.userId : null;
-
-      const updated = await tx.exercises.update({
-        where: { id },
-        data: {
-          approvalStatus: status,
-          approvedAt,
-          approvedById,
-          version: existing.version + 1,
-        },
-        include: EXERCISE_INCLUDE,
-      });
-
-      const snapshot = this.buildSnapshot(updated);
-
-      await this.recordVersion(
-        tx,
-        id,
-        updated.version,
-        previousSnapshot,
-        snapshot,
-        options.userId,
-        {
-          event: 'APPROVAL',
-          approvalStatus: status,
-        }
-      );
-
-      return updated;
+    const { previous, updated } = await getExerciseRepo().setApprovalStatusTx(id, {
+      approvalStatus: status,
+      approvedAt,
+      approvedById,
     });
+
+    const prev = previous as unknown as ExerciseWithRelations;
+    const upd = updated as unknown as ExerciseWithRelations;
+    const previousSnapshot = this.buildSnapshot(prev);
+    const snapshot = this.buildSnapshot(upd);
+
+    await this.recordVersion(
+      id,
+      upd.version,
+      previousSnapshot,
+      snapshot,
+      options.userId,
+      {
+        event: 'APPROVAL',
+        approvalStatus: status,
+      }
+    );
+
+    const result = upd;
 
     this.invalidateCaches();
     return this.mapExerciseToLocalized(result, DEFAULT_LOCALE, true);
   }
 
   static async delete(id: string): Promise<{ id: string; slug: string }> {
-    // Ottimizzazione: non invalidare tutta la cache, ma solo le chiavi rilevanti se possibile
-    // Per ora manteniamo invalidateCaches per sicurezza ma è un punto di miglioramento
-    const deleted = await prisma.exercises.delete({
-      where: { id },
-      select: { id: true, slug: true },
-    });
+    const deleted = await getExerciseRepo().deleteExercise(id);
 
     this.invalidateCaches();
     return deleted;
@@ -620,12 +534,10 @@ export class ExerciseService {
       return { deleted: 0 };
     }
 
-    const result = await prisma.exercises.deleteMany({
-      where: { id: { in: ids } },
-    });
+    const count = await getExerciseRepo().deleteExercises(ids);
 
     this.invalidateCaches();
-    return { deleted: result.count };
+    return { deleted: count };
   }
 
   private static sanitizeListOptions(
@@ -737,7 +649,7 @@ export class ExerciseService {
       instructions: [...exercise.instructions],
       exerciseTips: [...exercise.exerciseTips],
       variations: [...exercise.variations],
-      approvalStatus: exercise.approvalStatus,
+      approvalStatus: exercise.approvalStatus as LocalizedExercise['approvalStatus'],
       approvedAt: exercise.approvedAt ?? null,
       isUserGenerated: exercise.isUserGenerated,
       version: exercise.version,
@@ -819,7 +731,7 @@ export class ExerciseService {
       instructions: [], // Non caricato
       exerciseTips: [], // Non caricato
       variations: [], // Non caricato
-      approvalStatus: exercise.approvalStatus,
+      approvalStatus: exercise.approvalStatus as LocalizedExercise['approvalStatus'],
       approvedAt: exercise.approvedAt ?? null,
       isUserGenerated: exercise.isUserGenerated,
       version: exercise.version,
@@ -923,28 +835,25 @@ export class ExerciseService {
   }
 
   private static async recordVersion(
-    tx: TransactionClient,
     exerciseId: string,
     version: number,
     previousSnapshot: ExerciseSnapshot | null,
     snapshot: ExerciseSnapshot,
     userId?: string,
-    metadata?: Prisma.JsonObject
+    metadata?: Record<string, unknown>
   ) {
     const diff = compare(previousSnapshot ?? {}, snapshot) as Operation[];
 
-    await tx.exercise_versions.create({
-      data: {
-        exerciseId,
-        version,
-        diff: toPrismaJsonValue(diff as unknown[]),
-        baseVersion: previousSnapshot ? version - 1 : null,
-        metadata: {
-          ...(metadata ?? {}),
-          diffSize: diff.length,
-        },
-        createdById: userId ?? null,
+    await getExerciseRepo().recordExerciseVersion({
+      exerciseId,
+      version,
+      diff,
+      baseVersion: previousSnapshot ? version - 1 : null,
+      metadata: {
+        ...(metadata ?? {}),
+        diffSize: diff.length,
       },
+      createdById: userId ?? null,
     });
   }
 
@@ -954,10 +863,10 @@ export class ExerciseService {
   }
 
   private static buildWhereClause(filters: Partial<ExerciseQueryParams>) {
-    const where: Prisma.exercisesWhereInput = {};
+    const where: Record<string, unknown> = {};
 
     if (!filters.includeUnapproved) {
-      where.approvalStatus = ExerciseApprovalStatus.APPROVED;
+      where.approvalStatus = 'APPROVED';
     }
 
     if (filters.approvalStatus) {
@@ -995,130 +904,6 @@ export class ExerciseService {
     return where;
   }
 
-  private static async countSearchFullText(
-    term: string,
-    options: {
-      locale: string;
-      filters: Partial<ExerciseQueryParams>;
-    }
-  ): Promise<number> {
-    const whereClause = this.getSearchConditions(term, options.locale, options.filters);
-
-    // Using a subquery because of the GROUP BY in the full text search logic
-    const result = await prisma.$queryRaw<{ count: bigint }[]>(Prisma.sql`
-      SELECT COUNT(*)::bigint as count FROM (
-        SELECT e.id
-        FROM "exercises" e
-        INNER JOIN "exercise_translations" et ON et."exerciseId" = e.id
-        WHERE ${whereClause}
-        GROUP BY e.id
-      ) as sub
-    `);
-
-    return Number(result[0]?.count ?? 0);
-  }
-
-  private static async searchFullText(
-    term: string,
-    options: {
-      locale: string;
-      limit: number;
-      offset: number;
-      filters: Partial<ExerciseQueryParams>;
-    }
-  ): Promise<SearchResultRow[]> {
-    const query = term.trim();
-    if (!query) {
-      return [];
-    }
-
-    // Use dynamic to_tsvector (like Food service) instead of indexed column
-    // This is more reliable as it doesn't require a pre-populated column
-    const preparedTerm = query.replace(/[:!&|']/g, ' ');
-    const whereClause = this.getSearchConditions(term, options.locale, options.filters);
-
-    const rows = await prisma.$queryRaw<SearchResultRow[]>(Prisma.sql`
-      SELECT
-        e.id AS id,
-        MAX(CASE WHEN et."locale" = ${options.locale} THEN 1 ELSE 0 END)::boolean AS has_locale,
-        MAX(
-          ts_rank_cd(
-            to_tsvector('italian', et.name || ' ' || COALESCE(et.description, '')),
-            plainto_tsquery('italian', ${preparedTerm})
-          ) * CASE 
-            WHEN et."locale" = ${options.locale} THEN 2.0
-            WHEN et."locale" = ${DEFAULT_LOCALE} THEN 1.0
-            ELSE 0.5
-          END
-        ) AS rank
-      FROM "exercises" e
-      INNER JOIN "exercise_translations" et ON et."exerciseId" = e.id
-      WHERE ${whereClause}
-      GROUP BY e.id
-      ORDER BY rank DESC, e."createdAt" DESC
-      LIMIT ${options.limit} OFFSET ${options.offset}
-    `);
-
-    return rows;
-  }
-
-  private static getSearchConditions(
-    term: string,
-    locale: string,
-    filters: Partial<ExerciseQueryParams>
-  ): Prisma.Sql {
-    const query = term.trim();
-    const preparedTerm = query.replace(/[:!&|']/g, ' ');
-
-    const conditions: Prisma.Sql[] = [
-      Prisma.sql`(et."locale" = ${locale} OR et."locale" = ${DEFAULT_LOCALE})`,
-      Prisma.sql`to_tsvector('italian', et.name || ' ' || COALESCE(et.description, '')) @@ plainto_tsquery('italian', ${preparedTerm})`,
-    ];
-
-    if (!filters.includeUnapproved) {
-      conditions.push(Prisma.sql`e."approvalStatus" = 'APPROVED'::"ExerciseApprovalStatus"`);
-    }
-
-    if (filters.approvalStatus) {
-      conditions.push(
-        Prisma.sql`e."approvalStatus" = ${filters.approvalStatus}::"ExerciseApprovalStatus"`
-      );
-    }
-
-    if (filters.exerciseTypeId) {
-      conditions.push(Prisma.sql`e."exerciseTypeId" = ${filters.exerciseTypeId}`);
-    }
-
-    if (filters.muscleIds?.length) {
-      const arraySql = Prisma.sql`ARRAY[${Prisma.join(
-        filters.muscleIds.map((muscleId: unknown) => Prisma.sql`${muscleId}`)
-      )}]::text[]`;
-      conditions.push(
-        Prisma.sql`EXISTS (SELECT 1 FROM "exercise_muscles" em WHERE em."exerciseId" = e.id AND em."muscleId" = ANY(${arraySql}))`
-      );
-    }
-
-    if (filters.bodyPartIds?.length) {
-      const arraySql = Prisma.sql`ARRAY[${Prisma.join(
-        filters.bodyPartIds.map((partId: unknown) => Prisma.sql`${partId}`)
-      )}]::text[]`;
-      conditions.push(
-        Prisma.sql`EXISTS (SELECT 1 FROM "exercise_body_parts" eb WHERE eb."exerciseId" = e.id AND eb."bodyPartId" = ANY(${arraySql}))`
-      );
-    }
-
-    if (filters.equipmentIds?.length) {
-      const arraySql = Prisma.sql`ARRAY[${Prisma.join(
-        filters.equipmentIds.map((equipmentId: unknown) => Prisma.sql`${equipmentId}`)
-      )}]::text[]`;
-      conditions.push(
-        Prisma.sql`EXISTS (SELECT 1 FROM "exercise_equipments" ee WHERE ee."exerciseId" = e.id AND ee."equipmentId" = ANY(${arraySql}))`
-      );
-    }
-
-    return Prisma.join(conditions, ' AND ');
-  }
-
   private static prepareCreateData(
     payload: CreateExerciseInput,
     options: { userId?: string; autoApprove?: boolean }
@@ -1152,8 +937,8 @@ export class ExerciseService {
     const exerciseId = createId();
 
     const approvalStatus = options.autoApprove
-      ? ExerciseApprovalStatus.APPROVED
-      : ExerciseApprovalStatus.PENDING;
+      ? 'APPROVED'
+      : 'PENDING';
 
     return {
       exercise: {
@@ -1208,7 +993,7 @@ export class ExerciseService {
     existing: ExerciseWithRelations,
     userId?: string
   ) {
-    const exerciseUpdate: Prisma.exercisesUpdateInput = {};
+    const exerciseUpdate: Record<string, unknown> = {};
 
     if (payload.slug) {
       exerciseUpdate.slug = payload.slug.trim();
@@ -1255,8 +1040,8 @@ export class ExerciseService {
     if (payload.approvalStatus && payload.approvalStatus !== existing.approvalStatus) {
       exerciseUpdate.approvalStatus = payload.approvalStatus;
       exerciseUpdate.approvedAt =
-        payload.approvalStatus === ExerciseApprovalStatus.APPROVED ? new Date() : null;
-      if (payload.approvalStatus === ExerciseApprovalStatus.APPROVED && userId) {
+        payload.approvalStatus === 'APPROVED' ? new Date() : null;
+      if (payload.approvalStatus === 'APPROVED' && userId) {
         (exerciseUpdate as Record<string, unknown>).approvedById = userId;
       } else {
         (exerciseUpdate as Record<string, unknown>).approvedById = null;
@@ -1302,7 +1087,7 @@ export class ExerciseService {
   private static prepareRelatedRelations(
     exerciseId: string,
     relations: ExerciseRelationInput[]
-  ): Prisma.exercise_relationsCreateManyInput[] {
+  ): Record<string, unknown>[] {
     if (!relations.length) {
       return [];
     }

@@ -10,17 +10,24 @@
  * La validazione usa lo schema Zod centralizzato da @onecoach/schemas
  */
 
-import { prisma } from '@giulio-leone/lib-core';
+import { ServiceRegistry, REPO_TOKENS } from '@giulio-leone/core';
+import type { IExerciseRepository, IUserRepository, OneRepMaxVersion } from '@giulio-leone/core/repositories';
 import type {
   UserOneRepMax,
   UserOneRepMaxWithExercise,
-  UserOneRepMaxVersion,
 } from '@giulio-leone/types';
-import { Prisma } from '@prisma/client';
 import { createId } from '@giulio-leone/lib-shared';
 import { OneRepMaxInputSchema, type OneRepMaxInput } from '@giulio-leone/schemas';
 
 import { logger } from '@giulio-leone/lib-core';
+
+function getExerciseRepo(): IExerciseRepository {
+  return ServiceRegistry.getInstance().resolve<IExerciseRepository>(REPO_TOKENS.EXERCISE);
+}
+
+function getUserRepo(): IUserRepository {
+  return ServiceRegistry.getInstance().resolve<IUserRepository>(REPO_TOKENS.USER);
+}
 /**
  * Input per creare/aggiornare un massimale
  */
@@ -68,38 +75,9 @@ export class OneRepMaxService {
    */
   static async getByUserId(userId: string): Promise<ServiceResult<UserOneRepMaxWithExercise[]>> {
     try {
-      if (!prisma) {
-        logger.error('[OneRepMaxService] Prisma client not available');
-        return {
-          success: false,
-          error: 'Database connection error: Prisma client not initialized',
-        };
-      }
+      const maxes = await getExerciseRepo().findUserMaxesWithExercises({ userId });
 
-      if (typeof prisma.user_one_rep_max === 'undefined') {
-        logger.error('[OneRepMaxService] userOneRepMax model not available in Prisma client');
-        return {
-          success: false,
-          error: 'Database model not available. Please restart the development server.',
-        };
-      }
-
-      const maxes = await prisma.user_one_rep_max.findMany({
-        where: { userId },
-        include: {
-          exercises: {
-            include: {
-              exercise_translations: {
-                where: { locale: 'it' },
-                take: 1,
-              },
-            },
-          },
-        },
-        orderBy: { lastUpdated: 'desc' },
-      });
-
-      const normalized: UserOneRepMaxWithExercise[] = maxes.map((max: any) => ({
+      const normalized: UserOneRepMaxWithExercise[] = maxes.map((max) => ({
         ...max,
         oneRepMax: Number(max.oneRepMax),
       })) as UserOneRepMaxWithExercise[];
@@ -124,22 +102,7 @@ export class OneRepMaxService {
     catalogExerciseId: string
   ): Promise<ServiceResult<UserOneRepMaxWithExercise | null>> {
     try {
-      const max = await prisma.user_one_rep_max.findFirst({
-        where: {
-          userId,
-          exerciseId: catalogExerciseId,
-        },
-        include: {
-          exercises: {
-            include: {
-              exercise_translations: {
-                where: { locale: 'it' },
-                take: 1,
-              },
-            },
-          },
-        },
-      });
+      const max = await getExerciseRepo().findMaxByExercise(catalogExerciseId, { userId }, true);
 
       const normalized: UserOneRepMaxWithExercise | null = max
         ? ({
@@ -189,10 +152,7 @@ export class OneRepMaxService {
       const catalogExerciseId = validatedInput.catalogExerciseId;
 
       // Verifica esistenza utente
-      const user = await prisma.users.findUnique({
-        where: { id: userId },
-        select: { id: true },
-      });
+      const user = await getUserRepo().findById(userId);
 
       if (!user) {
         return {
@@ -202,9 +162,7 @@ export class OneRepMaxService {
       }
 
       // Verifica esistenza esercizio nel catalogo
-      const exercise = await prisma.exercises.findUnique({
-        where: { id: catalogExerciseId },
-      });
+      const exercise = await getExerciseRepo().findExerciseById(catalogExerciseId);
 
       if (!exercise) {
         return {
@@ -213,12 +171,8 @@ export class OneRepMaxService {
         };
       }
 
-      const existingMax = await prisma.user_one_rep_max.findFirst({
-        where: {
-          userId,
-          exerciseId: catalogExerciseId,
-        },
-      });
+      const repo = getExerciseRepo();
+      const existingMax = await repo.findMaxByExercise(catalogExerciseId, { userId });
 
       if (existingMax) {
         const hasChanges =
@@ -226,41 +180,24 @@ export class OneRepMaxService {
           existingMax.notes !== (validatedInput.notes ?? null);
 
         if (hasChanges) {
-          await prisma.user_one_rep_max_versions.create({
-            data: {
-              id: createId(),
-              maxId: existingMax.id,
-              userId: existingMax.userId ?? userId,
-              exerciseId: existingMax.exerciseId,
-              oneRepMax: existingMax.oneRepMax,
-              notes: existingMax.notes,
-              version: existingMax.version,
-              createdBy: userId,
-            },
+          await repo.createOneRepMaxVersion({
+            id: createId(),
+            maxId: existingMax.id,
+            userId: existingMax.userId ?? userId,
+            exerciseId: existingMax.exerciseId,
+            oneRepMax: existingMax.oneRepMax,
+            notes: existingMax.notes,
+            version: existingMax.version,
+            createdBy: userId,
           });
 
           const newVersion = existingMax.version + 1;
 
-          const max = await prisma.user_one_rep_max.update({
-            where: {
-              id: existingMax.id,
-            },
-            data: {
-              oneRepMax: validatedInput.oneRepMax,
-              notes: validatedInput.notes ?? null,
-              version: newVersion,
-              lastUpdated: new Date(),
-            },
-            include: {
-              exercises: {
-                include: {
-                  exercise_translations: {
-                    where: { locale: 'it' },
-                    take: 1,
-                  },
-                },
-              },
-            },
+          const max = await repo.updateOneRepMaxFull(existingMax.id, {
+            oneRepMax: validatedInput.oneRepMax,
+            notes: validatedInput.notes ?? null,
+            version: newVersion,
+            lastUpdated: new Date(),
           });
 
           const normalized: UserOneRepMaxWithExercise = {
@@ -270,55 +207,25 @@ export class OneRepMaxService {
 
           return { success: true, data: normalized };
         } else {
+          // No changes — re-fetch with exercise include for the response
+          const fullMax = await repo.findMaxByExercise(catalogExerciseId, { userId }, true);
+
           const normalized: UserOneRepMaxWithExercise = {
-            ...existingMax,
-            oneRepMax: Number(existingMax.oneRepMax),
+            ...(fullMax ?? existingMax),
+            oneRepMax: Number((fullMax ?? existingMax).oneRepMax),
           } as UserOneRepMaxWithExercise;
-
-          const exerciseData = await prisma.exercises.findUnique({
-            where: { id: existingMax.exerciseId },
-            include: {
-              exercise_translations: {
-                where: { locale: 'it' },
-                take: 1,
-              },
-            },
-          });
-
-          if (exerciseData) {
-            (normalized as unknown as Record<string, unknown>).exercise = {
-              id: exerciseData.id,
-              slug: exerciseData.slug,
-              translations: exerciseData.exercise_translations.map((t: any) => ({
-                name: t.name,
-                locale: t.locale,
-              })),
-            };
-          }
 
           return { success: true, data: normalized };
         }
       }
 
-      const max = await prisma.user_one_rep_max.create({
-        data: {
-          id: createId(),
-          userId,
-          exerciseId: catalogExerciseId,
-          oneRepMax: validatedInput.oneRepMax,
-          notes: validatedInput.notes ?? null,
-          version: 1,
-        },
-        include: {
-          exercises: {
-            include: {
-              exercise_translations: {
-                where: { locale: 'it' },
-                take: 1,
-              },
-            },
-          },
-        },
+      const max = await repo.createOneRepMaxFull({
+        id: createId(),
+        userId,
+        exerciseId: catalogExerciseId,
+        oneRepMax: validatedInput.oneRepMax,
+        notes: validatedInput.notes ?? null,
+        version: 1,
       });
 
       const normalized: UserOneRepMaxWithExercise = {
@@ -329,16 +236,16 @@ export class OneRepMaxService {
       return { success: true, data: normalized };
     } catch (error: unknown) {
       if (error instanceof Error) {
-        const prismaError = error as Prisma.PrismaClientKnownRequestError;
+        const errAny = error as { code?: string; meta?: Record<string, unknown> };
 
-        if (prismaError.code === 'P2002') {
+        if (errAny.code === 'P2002') {
           return {
             success: false,
             error: 'Esiste già un massimale per questo esercizio',
           };
         }
-        if (prismaError.code === 'P2003') {
-          const field = (prismaError.meta?.field_name as string) || 'relazione';
+        if (errAny.code === 'P2003') {
+          const field = (errAny.meta?.field_name as string) || 'relazione';
           if (field.includes('userId')) {
             return {
               success: false,
@@ -374,14 +281,9 @@ export class OneRepMaxService {
   static async getVersions(
     userId: string,
     catalogExerciseId: string
-  ): Promise<ServiceResult<UserOneRepMaxVersion[]>> {
+  ): Promise<ServiceResult<OneRepMaxVersion[]>> {
     try {
-      const max = await prisma.user_one_rep_max.findFirst({
-        where: {
-          userId,
-          exerciseId: catalogExerciseId,
-        },
-      });
+      const max = await getExerciseRepo().findMaxByExercise(catalogExerciseId, { userId });
 
       if (!max) {
         return {
@@ -390,15 +292,12 @@ export class OneRepMaxService {
         };
       }
 
-      const versions = await prisma.user_one_rep_max_versions.findMany({
-        where: { maxId: max.id },
-        orderBy: { version: 'desc' },
-      });
+      const versions = await getExerciseRepo().findVersionsByMaxId(max.id);
 
-      const normalized: UserOneRepMaxVersion[] = versions.map((v: any) => ({
+      const normalized: OneRepMaxVersion[] = versions.map((v) => ({
         ...v,
         oneRepMax: Number(v.oneRepMax),
-      })) as UserOneRepMaxVersion[];
+      }));
 
       return { success: true, data: normalized };
     } catch (error: unknown) {
@@ -417,9 +316,7 @@ export class OneRepMaxService {
    */
   static async delete(userId: string, catalogExerciseId: string): Promise<ServiceResult<void>> {
     try {
-      const existing = await prisma.user_one_rep_max.findFirst({
-        where: { userId, exerciseId: catalogExerciseId },
-      });
+      const existing = await getExerciseRepo().findMaxByExercise(catalogExerciseId, { userId });
       if (!existing) {
         return {
           success: false,
@@ -427,12 +324,11 @@ export class OneRepMaxService {
         };
       }
 
-      await prisma.user_one_rep_max.delete({
-        where: { id: existing.id },
-      });
+      await getExerciseRepo().deleteOneRepMax(existing.id);
       return { success: true };
     } catch (error: unknown) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      const errAny = error as { code?: string };
+      if (errAny.code === 'P2025') {
         return {
           success: false,
           error: 'Massimale non trovato',
@@ -456,11 +352,9 @@ export class OneRepMaxService {
     catalogExerciseIds: string[]
   ): Promise<ServiceResult<Map<string, UserOneRepMax>>> {
     try {
-      const maxes = await prisma.user_one_rep_max.findMany({
-        where: {
-          userId,
-          exerciseId: { in: catalogExerciseIds },
-        },
+      const maxes = await getExerciseRepo().findOneRepMaxMany({
+        userId,
+        exerciseId: { in: catalogExerciseIds },
       });
 
       const map = new Map<string, UserOneRepMax>();

@@ -7,7 +7,9 @@
  * @module workout/agents/utils/data-service
  */
 
-import { prisma } from '@giulio-leone/lib-core';
+import { prisma as legacyPrisma } from '@giulio-leone/lib-core';
+import { ServiceRegistry, REPO_TOKENS } from '@giulio-leone/core';
+import type { IWorkoutRepository, IExerciseRepository, INutritionPlanRepository } from '@giulio-leone/core/repositories';
 import { logger as sharedLogger } from '@giulio-leone/lib-shared';
 import type {
   ExistingUserProfile,
@@ -17,6 +19,22 @@ import type {
 
 const serviceLogger = sharedLogger.child('WorkoutMeshData');
 
+// ---------------------------------------------------------------------------
+// Repository resolvers (Hexagonal Architecture)
+// ---------------------------------------------------------------------------
+
+function getWorkoutRepo(): IWorkoutRepository {
+  return ServiceRegistry.getInstance().resolve<IWorkoutRepository>(REPO_TOKENS.WORKOUT);
+}
+
+function getExerciseRepo(): IExerciseRepository {
+  return ServiceRegistry.getInstance().resolve<IExerciseRepository>(REPO_TOKENS.EXERCISE);
+}
+
+function getNutritionRepo(): INutritionPlanRepository {
+  return ServiceRegistry.getInstance().resolve<INutritionPlanRepository>(REPO_TOKENS.NUTRITION);
+}
+
 // ============================================================================
 // USER PROFILE
 // ============================================================================
@@ -24,9 +42,11 @@ const serviceLogger = sharedLogger.child('WorkoutMeshData');
 /**
  * Fetch existing user profile from database.
  */
+// TODO: M1 — refactor to getUserRepo().findUserProfile() once IUserRepository
+// exposes age, sex, heightCm, weightKg, dailyCalories, workoutGoal, weightIncrement
 export async function fetchExistingProfile(userId: string): Promise<ExistingUserProfile | null> {
   try {
-    const profile = await prisma.user_profiles.findUnique({
+    const profile = await legacyPrisma.user_profiles.findUnique({
       where: { userId },
       select: {
         id: true,
@@ -80,6 +100,7 @@ export async function fetchExistingProfile(userId: string): Promise<ExistingUser
 /**
  * Fetch body measurement history for the user.
  */
+// TODO: M1 — extract to dedicated repository
 export async function fetchBodyMeasurementHistory(
   userId: string,
   limitDays = 90
@@ -88,7 +109,7 @@ export async function fetchBodyMeasurementHistory(
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - limitDays);
 
-    const measurements = await prisma.body_measurements.findMany({
+    const measurements = await legacyPrisma.body_measurements.findMany({
       where: {
         userId,
         date: { gte: cutoffDate },
@@ -126,22 +147,13 @@ export async function fetchBodyMeasurementHistory(
  */
 export async function fetchWorkoutHistory(userId: string, limit = 10): Promise<WorkoutHistory> {
   try {
-    const programs = await prisma.workout_programs.findMany({
-      where: { userId },
-      select: {
-        id: true,
-        name: true,
-        goals: true,
-        durationWeeks: true,
-        createdAt: true,
-        status: true,
-      },
-      orderBy: { createdAt: 'desc' },
-      take: limit,
-    });
+    const programs = await getWorkoutRepo().findMany(
+      { userId },
+      { orderBy: { createdAt: 'desc' }, take: limit }
+    );
 
     return {
-      programs: programs.map((p: any) => ({
+      programs: programs.map((p) => ({
         id: p.id,
         name: p.name || 'Untitled Program',
         goal: (p.goals as string[])?.[0] || 'general_fitness',
@@ -216,10 +228,8 @@ export async function fetchExerciseCatalog(
     const ignoreEquipment = !equipmentNames || equipmentNames.length === 0;
     const safeEquipmentList = ignoreEquipment ? [] : equipmentNames;
 
-    // OPTIMIZED RAW SQL QUERY
-    // Uses LATERAL JOIN pattern (via array_agg in main select) to avoid N+1 and massive joins
-    // Properly quotes mixed-case identifiers based on schema verification
-    const rawExercises = await prisma.$queryRaw<
+    // TODO: M1 — extract to IExerciseRepository once raw SQL queries are supported
+    const rawExercises = await legacyPrisma.$queryRaw<
       Array<{
         id: string;
         slug: string;
@@ -276,7 +286,7 @@ export async function fetchExerciseCatalog(
     // If no results, try Prisma fallback silently or with minimal warn if unexpected
     if (rawExercises.length === 0) {
       // Fallback to Prisma ORM query
-      const prismaExercises = await prisma.exercises.findMany({
+      const prismaExercises = await legacyPrisma.exercises.findMany({
         take: limit,
         include: {
           exercise_translations: {
@@ -363,19 +373,7 @@ import type {
  */
 export async function fetchUserMaxes(userId: string): Promise<UserMaxes> {
   try {
-    const maxes = await prisma.user_one_rep_max.findMany({
-      where: { userId },
-      include: {
-        exercises: {
-          include: {
-            exercise_translations: {
-              where: { locale: 'it' },
-              take: 1,
-            },
-          },
-        },
-      },
-    });
+    const maxes = await getExerciseRepo().findUserMaxesWithExercises({ userId });
 
     return {
       maxes: maxes.map((m: any) => ({
@@ -402,18 +400,11 @@ export async function fetchUserMaxes(userId: string): Promise<UserMaxes> {
  */
 export async function fetchLastProgramDetails(userId: string): Promise<LastProgramContext | null> {
   try {
-    const program = await prisma.workout_programs.findFirst({
-      where: { userId, status: 'COMPLETED' },
-      orderBy: { createdAt: 'desc' },
-      select: {
-        id: true,
-        name: true,
-        goals: true,
-        durationWeeks: true,
-        createdAt: true,
-        weeks: true,
-      },
-    });
+    const programs = await getWorkoutRepo().findMany(
+      { userId, status: 'COMPLETED' },
+      { orderBy: { createdAt: 'desc' }, take: 1 }
+    );
+    const program = programs[0] ?? null;
 
     if (!program) return null;
 
@@ -471,21 +462,17 @@ export async function fetchLastProgramDetails(userId: string): Promise<LastProgr
  */
 export async function fetchNutritionContext(userId: string): Promise<NutritionContext | null> {
   try {
-    const plan = await prisma.nutrition_plans.findFirst({
-      where: { userId, status: 'ACTIVE' },
-      orderBy: { createdAt: 'desc' },
-      select: {
-        id: true,
-        name: true,
-        targetMacros: true,
-        goals: true,
-      },
-    });
+    const plans = await getNutritionRepo().findMany(
+      { userId, status: 'ACTIVE' },
+      { orderBy: { createdAt: 'desc' }, take: 1 }
+    );
+    const plan = plans[0] ?? null;
 
     if (!plan) return null;
 
     const macros = plan.targetMacros as { calories?: number; protein?: number } | null;
-    const userProfile = await prisma.user_profiles.findUnique({
+    // TODO: M1 — refactor to getUserRepo() once IUserRepository exposes dailyCalories, weightKg
+    const userProfile = await legacyPrisma.user_profiles.findUnique({
       where: { userId },
       select: { dailyCalories: true, weightKg: true },
     });
@@ -520,9 +507,10 @@ export async function fetchNutritionContext(userId: string): Promise<NutritionCo
 /**
  * Fetch user memory for personalization.
  */
+// TODO: M1 — extract to dedicated repository
 export async function fetchUserMemoryContext(userId: string): Promise<UserMemoryContext | null> {
   try {
-    const memory = await prisma.user_memories.findUnique({
+    const memory = await legacyPrisma.user_memories.findUnique({
       where: { userId },
       select: { memory: true },
     });
@@ -540,7 +528,8 @@ export async function fetchUserMemoryContext(userId: string): Promise<UserMemory
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - 90);
 
-    const recentEvents = await prisma.user_memory_timeline.findMany({
+    // TODO: M1 — extract to dedicated repository
+    const recentEvents = await legacyPrisma.user_memory_timeline.findMany({
       where: {
         userId,
         domain: { in: ['workout', 'fitness', 'general'] },

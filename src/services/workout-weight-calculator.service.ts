@@ -1,4 +1,3 @@
-import { Prisma, type workout_programs } from '@prisma/client';
 import {
   prepareProgramForPersistence,
   normalizeWorkoutProgram,
@@ -7,12 +6,17 @@ import {
   calculateWeightFromRPE,
   calculateIntensityFromRPE,
 } from '@giulio-leone/one-workout';
-import { kgToLbs, logger, toPrismaJsonValue } from '@giulio-leone/lib-shared';
-import { prisma } from '@giulio-leone/lib-core';
+import { kgToLbs, logger } from '@giulio-leone/lib-shared';
+import { ServiceRegistry, REPO_TOKENS } from '@giulio-leone/core';
+import type { IWorkoutRepository, Workout } from '@giulio-leone/core/repositories';
 import { OneRepMaxService } from './one-rep-max.service';
 import type { WorkoutProgram, ExerciseSet, SetGroup } from '@giulio-leone/types/workout';
 
 const log = logger.child('WorkoutWeightCalculatorService');
+
+function getWorkoutRepo() {
+  return ServiceRegistry.getInstance().resolve<IWorkoutRepository>(REPO_TOKENS.WORKOUT);
+}
 
 /**
  * Workout Weight Calculator Service
@@ -206,17 +210,13 @@ export async function updateProgramWeightsForExerciseId(
     log.debug(`[updateProgramWeightsForExerciseId] 1RM loaded: ${oneRepMaxKg} kg`);
 
     // 2. Trova SOLO i programmi ACTIVE che contengono questo esercizio
-    //    Usa query JSONB per filtrare nel DB invece di caricare tutto
-    const likePattern = `%"catalogExerciseId":"${catalogExerciseId}"%`;
-    log.debug(`[updateProgramWeightsForExerciseId] Searching programs with LIKE: ${likePattern}`);
+    log.debug(`[updateProgramWeightsForExerciseId] Searching ACTIVE programs for user`);
 
-    const programs = await prisma.$queryRaw<Array<{ id: string; weeks: Prisma.JsonValue }>>`
-      SELECT id, weeks
-      FROM workout_programs
-      WHERE "userId" = ${userId}
-        AND status = 'ACTIVE'
-        AND weeks::text LIKE ${likePattern}
-    `;
+    const allPrograms = await getWorkoutRepo().findMany({ userId, status: 'ACTIVE' });
+    const programs = allPrograms.filter((p: Workout) => {
+      const weeksStr = JSON.stringify(p.weeks);
+      return weeksStr.includes(`"catalogExerciseId":"${catalogExerciseId}"`);
+    });
 
     log.debug(`[updateProgramWeightsForExerciseId] Programs found: ${programs.length}`);
 
@@ -229,7 +229,7 @@ export async function updateProgramWeightsForExerciseId(
     const updatePromises = programs.map(async (program: any) => {
       log.debug(`[updateProgramWeightsForExerciseId] Processing program: ${program.id}`);
 
-      const normalizedProgram = normalizeWorkoutProgram(program as unknown as workout_programs);
+      const normalizedProgram = normalizeWorkoutProgram(program);
       let hasChanges = false;
       let exercisesUpdated = 0;
 
@@ -306,12 +306,9 @@ export async function updateProgramWeightsForExerciseId(
 
       log.debug(`[updateProgramWeightsForExerciseId] Saving program: ${program.id}`);
 
-      await prisma.workout_programs.update({
-        where: { id: program.id },
-        data: {
-          weeks: toPrismaJsonValue(persistence.weeks as unknown[]),
-          updatedAt: new Date(),
-        },
+      await getWorkoutRepo().update(program.id, {
+        weeks: persistence.weeks as unknown[],
+        updatedAt: new Date(),
       });
 
       log.debug(`[updateProgramWeightsForExerciseId] Program saved successfully: ${program.id}`);

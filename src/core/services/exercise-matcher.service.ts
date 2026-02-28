@@ -14,7 +14,12 @@
  * @module lib-workout/services/exercise-matcher
  */
 
-import { prisma } from '@giulio-leone/lib-core';
+function getExerciseRepo() {
+  return ServiceRegistry.getInstance().resolve<IExerciseRepository>(REPO_TOKENS.EXERCISE);
+}
+
+import { ServiceRegistry, REPO_TOKENS } from '@giulio-leone/core';
+import type { IExerciseRepository } from '@giulio-leone/core/repositories';
 import { SimpleCache } from '@giulio-leone/lib-shared';
 import { createId } from '@giulio-leone/lib-shared/utils';
 import type { ImportedExercise } from '@giulio-leone/schemas';
@@ -414,27 +419,12 @@ export class ExerciseMatcherService {
       return cached;
     }
 
-    const exercises = await prisma.exercises.findMany({
-      where: {
-        approvalStatus: 'APPROVED',
-      },
-      select: {
-        id: true,
-        slug: true,
-        exercise_translations: {
-          select: {
-            locale: true,
-            name: true,
-            searchTerms: true,
-          },
-        },
-      },
-    });
+    const exercises = await getExerciseRepo().findApprovedExercisesWithTranslations();
 
-    const result: DbExercise[] = exercises.map((e: (typeof exercises)[number]) => ({
+    const result: DbExercise[] = exercises.map((e) => ({
       id: e.id,
       slug: e.slug,
-      translations: e.exercise_translations.map((t: (typeof e.exercise_translations)[number]) => ({
+      translations: e.exercise_translations.map((t) => ({
         locale: t.locale,
         name: t.name,
         searchTerms: t.searchTerms || [],
@@ -793,24 +783,17 @@ export class ExerciseMatcherService {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-|-$/g, '');
 
-    await prisma.exercises.create({
-      data: {
-        id: exerciseId,
-        slug: `imported-${slug}-${Date.now()}`,
-        approvalStatus: 'PENDING',
-        isUserGenerated: true,
-        createdById: userId,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        exercise_translations: {
-          create: {
-            id: createId(),
-            locale: locale,
-            name: name,
-            searchTerms: [name.toLowerCase()],
-            updatedAt: new Date(),
-          },
-        },
+    await getExerciseRepo().createExerciseWithTranslation({
+      id: exerciseId,
+      slug: `imported-${slug}-${Date.now()}`,
+      approvalStatus: 'PENDING',
+      isUserGenerated: true,
+      createdById: userId,
+      translation: {
+        id: createId(),
+        locale: locale,
+        name: name,
+        searchTerms: [name.toLowerCase()],
       },
     });
 

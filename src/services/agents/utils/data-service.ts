@@ -7,9 +7,15 @@
  * @module workout/agents/utils/data-service
  */
 
-import { prisma as legacyPrisma } from '@giulio-leone/lib-core';
 import { ServiceRegistry, REPO_TOKENS } from '@giulio-leone/core';
-import type { IWorkoutRepository, IExerciseRepository, INutritionPlanRepository } from '@giulio-leone/core/repositories';
+import type {
+  IWorkoutRepository,
+  IExerciseRepository,
+  INutritionPlanRepository,
+  IUserRepository,
+  IBodyMeasurementRepository,
+  IUserMemoryRepository,
+} from '@giulio-leone/core/repositories';
 import { logger as sharedLogger } from '@giulio-leone/lib-shared';
 import type {
   ExistingUserProfile,
@@ -35,6 +41,18 @@ function getNutritionRepo(): INutritionPlanRepository {
   return ServiceRegistry.getInstance().resolve<INutritionPlanRepository>(REPO_TOKENS.NUTRITION);
 }
 
+function getUserRepo(): IUserRepository {
+  return ServiceRegistry.getInstance().resolve<IUserRepository>(REPO_TOKENS.USER);
+}
+
+function getBodyMeasurementRepo(): IBodyMeasurementRepository {
+  return ServiceRegistry.getInstance().resolve<IBodyMeasurementRepository>(REPO_TOKENS.BODY_MEASUREMENT);
+}
+
+function getUserMemoryRepo(): IUserMemoryRepository {
+  return ServiceRegistry.getInstance().resolve<IUserMemoryRepository>(REPO_TOKENS.USER_MEMORY);
+}
+
 // ============================================================================
 // USER PROFILE
 // ============================================================================
@@ -42,40 +60,19 @@ function getNutritionRepo(): INutritionPlanRepository {
 /**
  * Fetch existing user profile from database.
  */
-// TODO: M1 — refactor to getUserRepo().findUserProfile() once IUserRepository
-// exposes age, sex, heightCm, weightKg, dailyCalories, workoutGoal, weightIncrement
 export async function fetchExistingProfile(userId: string): Promise<ExistingUserProfile | null> {
   try {
-    const profile = await legacyPrisma.user_profiles.findUnique({
-      where: { userId },
-      select: {
-        id: true,
-        age: true,
-        sex: true,
-        heightCm: true,
-        weightKg: true,
-        activityLevel: true,
-        trainingFrequency: true,
-        dailyCalories: true,
-        workoutGoal: true,
-        workoutGoals: true,
-        equipment: true,
-        dietaryRestrictions: true,
-        dietType: true,
-        healthNotes: true,
-        weightIncrement: true,
-      },
-    });
+    const profile = await getUserRepo().findUserProfile(userId);
 
     if (!profile) return null;
 
     return {
       id: profile.id,
-      userId,
+      userId: profile.userId,
       age: profile.age,
       sex: profile.sex as ExistingUserProfile['sex'],
       heightCm: profile.heightCm,
-      weightKg: profile.weightKg ? Number(profile.weightKg) : null,
+      weightKg: profile.weightKg,
       activityLevel: profile.activityLevel as ExistingUserProfile['activityLevel'],
       trainingFrequency: profile.trainingFrequency,
       dailyCalories: profile.dailyCalories,
@@ -85,7 +82,7 @@ export async function fetchExistingProfile(userId: string): Promise<ExistingUser
       dietaryRestrictions: profile.dietaryRestrictions,
       dietType: profile.dietType,
       healthNotes: profile.healthNotes,
-      weightIncrement: profile.weightIncrement ? Number(profile.weightIncrement) : null,
+      weightIncrement: profile.weightIncrement,
     };
   } catch (error) {
     serviceLogger.error('Error fetching profile', error as Error);
@@ -100,36 +97,22 @@ export async function fetchExistingProfile(userId: string): Promise<ExistingUser
 /**
  * Fetch body measurement history for the user.
  */
-// TODO: M1 — extract to dedicated repository
 export async function fetchBodyMeasurementHistory(
   userId: string,
   limitDays = 90
 ): Promise<BodyMeasurementHistory> {
   try {
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - limitDays);
-
-    const measurements = await legacyPrisma.body_measurements.findMany({
-      where: {
-        userId,
-        date: { gte: cutoffDate },
-      },
-      select: {
-        date: true,
-        weight: true,
-        bodyFat: true,
-        muscleMass: true,
-      },
-      orderBy: { date: 'asc' },
+    const measurements = await getBodyMeasurementRepo().findByUserId(userId, {
+      limitDays,
       take: 100,
     });
 
     return {
-      measurements: measurements.map((m: any) => ({
+      measurements: measurements.map((m) => ({
         date: m.date,
-        weight: m.weight ? Number(m.weight) : null,
-        bodyFat: m.bodyFat ? Number(m.bodyFat) : null,
-        muscleMass: m.muscleMass ? Number(m.muscleMass) : null,
+        weight: m.weight,
+        bodyFat: m.bodyFat,
+        muscleMass: m.muscleMass,
       })),
     };
   } catch (error) {
@@ -172,33 +155,9 @@ export async function fetchWorkoutHistory(userId: string, limit = 10): Promise<W
 // EXERCISE CATALOG
 // ============================================================================
 
-// ============================================================================
-// EXERCISE CATALOG (OPTIMIZED)
-// ============================================================================
-
-import { LRUCache } from 'lru-cache';
-import { createHash } from 'crypto';
-
-// Initialize LRU Cache for exercise catalog
-// Key: userId + equipmentHash
-// TTL: 5 minutes
-/** Catalog exercise entry for LRU cache */
-interface CatalogExerciseEntry {
-  id: string;
-  name: string;
-  category: string;
-  targetMuscles: string[];
-  equipment: string[];
-}
-
-const exerciseCatalogCache = new LRUCache<string, CatalogExerciseEntry[]>({
-  max: 100,
-  ttl: 5 * 60 * 1000,
-});
-
 /**
- * Fetch exercise catalog, optimized with Raw SQL and caching.
- * Replaces the slow Prisma findMany with a single aggregated query.
+ * Fetch exercise catalog, delegated to the exercise repository adapter.
+ * LRU caching and raw SQL are handled inside the Prisma adapter.
  */
 export async function fetchExerciseCatalog(
   userId: string,
@@ -213,147 +172,12 @@ export async function fetchExerciseCatalog(
     equipment: string[];
   }>
 > {
-  const equipmentHash = equipmentNames
-    ? createHash('md5').update(equipmentNames.sort().join(',')).digest('hex')
-    : 'all';
-  const cacheKey = `${userId}:${equipmentHash}`;
-
-  const cached = exerciseCatalogCache.get(cacheKey);
-  if (cached) {
-    serviceLogger.info('Exercise catalog cache hit', { userId, count: cached.length });
-    return cached;
-  }
-
   try {
-    const ignoreEquipment = !equipmentNames || equipmentNames.length === 0;
-    const safeEquipmentList = ignoreEquipment ? [] : equipmentNames;
-
-    // TODO: M1 — extract to IExerciseRepository once raw SQL queries are supported
-    const rawExercises = await legacyPrisma.$queryRaw<
-      Array<{
-        id: string;
-        slug: string;
-        name: string | null;
-        category: string | null;
-        target_muscles: string[] | null;
-        equipment: string[] | null;
-      }>
-    >`
-      SELECT 
-        e.id,
-        e.slug,
-        -- Prefer translated name, fallback to slug
-        COALESCE(t.name, e.slug) as name,
-        -- Category from exercise type
-        et.name as category,
-        -- Aggregate muscles
-        (
-          SELECT array_agg(DISTINCT m.name)
-          FROM exercise_muscles em
-          JOIN muscles m ON m.id = em."muscleId"
-          WHERE em."exerciseId" = e.id
-        ) as target_muscles,
-        -- Aggregate equipment
-        (
-          SELECT array_agg(DISTINCT eq.name)
-          FROM exercise_equipments ee
-          JOIN equipments eq ON eq.id = ee."equipmentId"
-          WHERE ee."exerciseId" = e.id
-        ) as equipment
-      FROM exercises e
-      -- Join translations for Italian
-      LEFT JOIN exercise_translations t ON t."exerciseId" = e.id AND t.locale = 'it'
-      -- Join types
-      LEFT JOIN exercise_types et ON et.id = e."exerciseTypeId"
-      WHERE 
-        -- Filter by approval or ownership
-        (e."approvalStatus" = 'APPROVED' OR e."createdById"::text = ${userId})
-        -- Filter by equipment availability (if provided)
-        AND (
-          ${ignoreEquipment}::boolean IS TRUE
-          OR EXISTS (
-             SELECT 1 
-             FROM exercise_equipments ee_check 
-             JOIN equipments eq_check ON eq_check.id = ee_check."equipmentId"
-             WHERE ee_check."exerciseId" = e.id 
-             AND eq_check.name = ANY(${safeEquipmentList})
-          )
-        )
-      ORDER BY e."createdAt" DESC
-      LIMIT ${limit};
-    `;
-
-    // If no results, try Prisma fallback silently or with minimal warn if unexpected
-    if (rawExercises.length === 0) {
-      // Fallback to Prisma ORM query
-      const prismaExercises = await legacyPrisma.exercises.findMany({
-        take: limit,
-        include: {
-          exercise_translations: {
-            where: { locale: 'it' },
-            take: 1,
-          },
-          exercise_types: true,
-          exercise_muscles: {
-            include: { muscles: true },
-          },
-          exercise_equipments: {
-            include: { equipments: true },
-          },
-        },
-      });
-
-      serviceLogger.info('Prisma fallback returned', { count: prismaExercises.length });
-
-      const mappedPrisma = prismaExercises.map((ex: any) => ({
-        id: ex.id,
-        name: ex.exercise_translations[0]?.name || ex.slug,
-        category: mapCategory(ex.exercise_types?.name || null),
-        targetMuscles: ex.exercise_muscles.map((em: any) => em.muscles.name),
-        equipment: ex.exercise_equipments.map((ee: any) => ee.equipments.name),
-      }));
-
-      exerciseCatalogCache.set(cacheKey, mappedPrisma);
-      return mappedPrisma;
-    }
-
-    const mappedExercises = rawExercises.map((ex: any) => ({
-      id: ex.id,
-      name: ex.name || ex.slug,
-      category: mapCategory(ex.category),
-      targetMuscles: ex.target_muscles || [],
-      equipment: ex.equipment || [],
-    }));
-
-    // Cache the result
-    exerciseCatalogCache.set(cacheKey, mappedExercises);
-
-    return mappedExercises;
+    return await getExerciseRepo().findCatalogExercises(userId, { equipmentNames, limit });
   } catch (error) {
-    serviceLogger.error('Error fetching exercise catalog (raw)', error as Error);
-    // Fallback to safe empty array or throw?
-    // Throwing allows the agent to retry or fail visibly rather than hallucinating with empty data.
+    serviceLogger.error('Error fetching exercise catalog', error as Error);
     throw new Error('Failed to fetch exercise catalog');
   }
-}
-
-/**
- * Map database category to agent category.
- */
-function mapCategory(category: string | null): string {
-  if (!category) return 'compound';
-
-  const categoryMap: Record<string, string> = {
-    STRENGTH: 'compound',
-    COMPOUND: 'compound',
-    ISOLATION: 'isolation',
-    CARDIO: 'cardio',
-    CORE: 'core',
-    MOBILITY: 'mobility',
-    STRETCHING: 'mobility',
-  };
-
-  return categoryMap[category.toUpperCase()] || 'compound';
 }
 
 // ============================================================================
@@ -471,16 +295,12 @@ export async function fetchNutritionContext(userId: string): Promise<NutritionCo
     if (!plan) return null;
 
     const macros = plan.targetMacros as { calories?: number; protein?: number } | null;
-    // TODO: M1 — refactor to getUserRepo() once IUserRepository exposes dailyCalories, weightKg
-    const userProfile = await legacyPrisma.user_profiles.findUnique({
-      where: { userId },
-      select: { dailyCalories: true, weightKg: true },
-    });
+    const userProfile = await getUserRepo().findUserProfile(userId);
 
     const tdee = userProfile?.dailyCalories || 2000;
     const targetCalories = macros?.calories || tdee;
     const calorieBalance = targetCalories - tdee;
-    const weightKg = userProfile?.weightKg ? Number(userProfile.weightKg) : 80;
+    const weightKg = userProfile?.weightKg ?? 80;
     const proteinPerKg = macros?.protein ? macros.protein / weightKg : null;
 
     let implication: NutritionContext['implication'] = 'maintenance';
@@ -507,13 +327,10 @@ export async function fetchNutritionContext(userId: string): Promise<NutritionCo
 /**
  * Fetch user memory for personalization.
  */
-// TODO: M1 — extract to dedicated repository
 export async function fetchUserMemoryContext(userId: string): Promise<UserMemoryContext | null> {
   try {
-    const memory = await legacyPrisma.user_memories.findUnique({
-      where: { userId },
-      select: { memory: true },
-    });
+    const memoryRepo = getUserMemoryRepo();
+    const memory = await memoryRepo.findMemory(userId);
 
     if (!memory) return null;
 
@@ -525,17 +342,9 @@ export async function fetchUserMemoryContext(userId: string): Promise<UserMemory
     const fitnessMemory = (memoryData.fitness || {}) as Record<string, unknown>;
 
     // Fetch recent timeline events
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - 90);
-
-    // TODO: M1 — extract to dedicated repository
-    const recentEvents = await legacyPrisma.user_memory_timeline.findMany({
-      where: {
-        userId,
-        domain: { in: ['workout', 'fitness', 'general'] },
-        date: { gte: cutoffDate },
-      },
-      orderBy: { date: 'desc' },
+    const recentEvents = await memoryRepo.findRecentTimeline(userId, {
+      domains: ['workout', 'fitness', 'general'],
+      limitDays: 90,
       take: 10,
     });
 
@@ -544,7 +353,7 @@ export async function fetchUserMemoryContext(userId: string): Promise<UserMemory
       injuries: (workoutMemory.injuries as string[]) || [],
       notes: (workoutMemory.notes as string[]) || [],
       fitnessLevel: (fitnessMemory.level as string | null) || null,
-      recentEvents: recentEvents.map((e: any) => ({
+      recentEvents: recentEvents.map((e) => ({
         type: e.eventType,
         title: e.title,
         date: e.date,

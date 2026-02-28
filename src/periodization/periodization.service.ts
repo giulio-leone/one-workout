@@ -122,6 +122,9 @@ export function getPhaseForWeek(
   }
 
   // Should never reach here if validation passed
+  if (mesocycle.phases.length === 0) {
+    throw new Error('Mesocycle has no phases');
+  }
   const lastPhase = mesocycle.phases[mesocycle.phases.length - 1]!;
   return {
     phase: lastPhase,

@@ -99,15 +99,14 @@ export function enrichGeneratedProgram(
   program: GeneratedProgram,
   periodization: PeriodizationContext
 ): EnrichedProgram {
-  const enrichedWeeks = program.weeks.map((week) => {
-    const weekConfig = periodization.weekConfigs[week.weekNumber - 1];
-    if (!weekConfig) {
-      throw new RangeError(
-        `No periodization config for week ${week.weekNumber} (program has ${periodization.weekConfigs.length} weeks)`
-      );
+  const enrichedWeeks: (GeneratedWeek & { periodization: WeekPeriodization })[] = [];
+  for (const week of program.weeks) {
+    if (week.weekNumber < 1 || week.weekNumber > periodization.weekConfigs.length) {
+      continue;
     }
-    return { ...week, periodization: weekConfig };
-  });
+    const weekConfig = periodization.weekConfigs[week.weekNumber - 1]!;
+    enrichedWeeks.push({ ...week, periodization: weekConfig });
+  }
 
   return {
     ...program,

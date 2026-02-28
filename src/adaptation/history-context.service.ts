@@ -84,7 +84,7 @@ export function buildWorkoutHistoryContext(params: {
     const lastDeloadWeek = periodizationState.deloadHistory.length > 0
       ? periodizationState.deloadHistory[periodizationState.deloadHistory.length - 1]!
       : 0;
-    const weeksSinceLastDeload = periodizationState.currentWeek - lastDeloadWeek;
+    const weeksSinceLastDeload = Math.max(0, periodizationState.currentWeek - lastDeloadWeek);
 
     deloadRecommendation = evaluateDeload(
       {

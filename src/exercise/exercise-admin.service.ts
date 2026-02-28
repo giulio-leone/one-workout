@@ -6,8 +6,7 @@
  * - Operazioni batch (CRUD) e automazioni AI
  */
 
-import { ServiceRegistry, REPO_TOKENS } from '@giulio-leone/core';
-import type { IExerciseRepository } from '@giulio-leone/core/repositories';
+import { getExerciseRepo } from '@giulio-leone/core';
 import { ExerciseService } from './exercise.service';
 import { toSlug } from '@giulio-leone/lib-shared';
 import {
@@ -20,10 +19,6 @@ import {
 import { validateExerciseTypeByName } from '@giulio-leone/lib-core';
 
 import { z } from 'zod';
-
-function getExerciseRepo(): IExerciseRepository {
-  return ServiceRegistry.getInstance().resolve<IExerciseRepository>(REPO_TOKENS.EXERCISE);
-}
 
 type ExerciseApprovalStatus = 'APPROVED' | 'PENDING';
 type ExerciseRelationType = NonNullable<ExerciseRelationInput['relation']>;

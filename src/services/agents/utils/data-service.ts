@@ -7,15 +7,14 @@
  * @module workout/agents/utils/data-service
  */
 
-import { ServiceRegistry, REPO_TOKENS } from '@giulio-leone/core';
-import type {
-  IWorkoutRepository,
-  IExerciseRepository,
-  INutritionPlanRepository,
-  IUserRepository,
-  IBodyMeasurementRepository,
-  IUserMemoryRepository,
-} from '@giulio-leone/core/repositories';
+import {
+  getWorkoutRepo,
+  getExerciseRepo,
+  getNutritionRepo,
+  getUserRepo,
+  getBodyMeasurementRepo,
+  getUserMemoryRepo,
+} from '@giulio-leone/core';
 import { logger as sharedLogger } from '@giulio-leone/lib-shared';
 import type {
   ExistingUserProfile,
@@ -24,34 +23,6 @@ import type {
 } from '@giulio-leone/types/workout';
 
 const serviceLogger = sharedLogger.child('WorkoutMeshData');
-
-// ---------------------------------------------------------------------------
-// Repository resolvers (Hexagonal Architecture)
-// ---------------------------------------------------------------------------
-
-function getWorkoutRepo(): IWorkoutRepository {
-  return ServiceRegistry.getInstance().resolve<IWorkoutRepository>(REPO_TOKENS.WORKOUT);
-}
-
-function getExerciseRepo(): IExerciseRepository {
-  return ServiceRegistry.getInstance().resolve<IExerciseRepository>(REPO_TOKENS.EXERCISE);
-}
-
-function getNutritionRepo(): INutritionPlanRepository {
-  return ServiceRegistry.getInstance().resolve<INutritionPlanRepository>(REPO_TOKENS.NUTRITION);
-}
-
-function getUserRepo(): IUserRepository {
-  return ServiceRegistry.getInstance().resolve<IUserRepository>(REPO_TOKENS.USER);
-}
-
-function getBodyMeasurementRepo(): IBodyMeasurementRepository {
-  return ServiceRegistry.getInstance().resolve<IBodyMeasurementRepository>(REPO_TOKENS.BODY_MEASUREMENT);
-}
-
-function getUserMemoryRepo(): IUserMemoryRepository {
-  return ServiceRegistry.getInstance().resolve<IUserMemoryRepository>(REPO_TOKENS.USER_MEMORY);
-}
 
 // ============================================================================
 // USER PROFILE

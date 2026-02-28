@@ -1,6 +1,6 @@
 import { logError } from '@giulio-leone/lib-shared';
-import { ServiceRegistry, REPO_TOKENS } from '@giulio-leone/core';
-import type { IExerciseRepository, IUserRepository, OneRepMaxVersion } from '@giulio-leone/core/repositories';
+import { getExerciseRepo, getUserRepo } from '@giulio-leone/core';
+import type { OneRepMaxVersion } from '@giulio-leone/core/repositories';
 
 import type {
   UserOneRepMaxWithExercise,
@@ -8,14 +8,6 @@ import type {
   OneRepMaxServiceResult,
 } from '@giulio-leone/types/workout';
 import { createId } from '@giulio-leone/lib-core';
-
-function getExerciseRepo(): IExerciseRepository {
-  return ServiceRegistry.getInstance().resolve<IExerciseRepository>(REPO_TOKENS.EXERCISE);
-}
-
-function getUserRepo(): IUserRepository {
-  return ServiceRegistry.getInstance().resolve<IUserRepository>(REPO_TOKENS.USER);
-}
 
 /**
  * One Rep Max Service

@@ -1,5 +1,5 @@
-import { ServiceRegistry, REPO_TOKENS } from '@giulio-leone/core';
-import type { IExerciseRepository, ExerciseSearchFilters } from '@giulio-leone/core/repositories';
+import { getExerciseRepo } from '@giulio-leone/core';
+import type { ExerciseSearchFilters } from '@giulio-leone/core/repositories';
 import { createId, toSlug } from '@giulio-leone/lib-shared/utils';
 import type {
   CreateExerciseInput,
@@ -12,10 +12,6 @@ import type { LocalizedExercise, ExerciseTranslationView } from '@giulio-leone/t
 import type { Operation } from 'fast-json-patch';
 import { compare } from 'fast-json-patch';
 import { SimpleCache } from '@giulio-leone/lib-shared';
-
-function getExerciseRepo(): IExerciseRepository {
-  return ServiceRegistry.getInstance().resolve<IExerciseRepository>(REPO_TOKENS.EXERCISE);
-}
 
 const DEFAULT_LOCALE = 'en';
 // Cache disabilitata per debug e consistenza dati

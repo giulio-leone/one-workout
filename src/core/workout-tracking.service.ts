@@ -12,9 +12,7 @@
  * - Dependency Inversion: Depends on repository abstractions (Hexagonal)
  */
 
-import { ServiceRegistry, REPO_TOKENS } from '@giulio-leone/core';
-import type { IWorkoutSessionRepository } from '@giulio-leone/core/repositories';
-import type { IWorkoutRepository } from '@giulio-leone/core/repositories';
+import { getWorkoutSessionRepo as getSessionRepo, getWorkoutRepo } from '@giulio-leone/core';
 import { createId } from '@giulio-leone/lib-shared/id-generator';
 import { deepClone } from '@giulio-leone/lib-shared';
 import { mapToWorkoutSession, mapToWorkoutSessions } from './mappers/workout-session.mapper';
@@ -27,15 +25,6 @@ import type {
   WorkoutProgramStats,
 } from '@giulio-leone/types/workout';
 import type { Exercise, SetGroup } from '@giulio-leone/types';
-
-/** Resolve repositories from the service registry */
-function getSessionRepo(): IWorkoutSessionRepository {
-  return ServiceRegistry.getInstance().resolve<IWorkoutSessionRepository>(REPO_TOKENS.WORKOUT_SESSION);
-}
-
-function getWorkoutRepo(): IWorkoutRepository {
-  return ServiceRegistry.getInstance().resolve<IWorkoutRepository>(REPO_TOKENS.WORKOUT);
-}
 
 /** Loose JSON structure for workout week from DB */
 interface JsonWeek {

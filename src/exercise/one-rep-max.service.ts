@@ -10,8 +10,8 @@
  * La validazione usa lo schema Zod centralizzato da @onecoach/schemas
  */
 
-import { ServiceRegistry, REPO_TOKENS } from '@giulio-leone/core';
-import type { IExerciseRepository, IUserRepository, OneRepMaxVersion } from '@giulio-leone/core/repositories';
+import { getExerciseRepo, getUserRepo } from '@giulio-leone/core';
+import type { OneRepMaxVersion } from '@giulio-leone/core/repositories';
 import type {
   UserOneRepMax,
   UserOneRepMaxWithExercise,
@@ -21,13 +21,6 @@ import { OneRepMaxInputSchema, type OneRepMaxInput } from '@giulio-leone/schemas
 
 import { logger } from '@giulio-leone/lib-core';
 
-function getExerciseRepo(): IExerciseRepository {
-  return ServiceRegistry.getInstance().resolve<IExerciseRepository>(REPO_TOKENS.EXERCISE);
-}
-
-function getUserRepo(): IUserRepository {
-  return ServiceRegistry.getInstance().resolve<IUserRepository>(REPO_TOKENS.USER);
-}
 /**
  * Input per creare/aggiornare un massimale
  */

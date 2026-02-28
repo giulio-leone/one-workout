@@ -14,12 +14,7 @@
  * @module lib-workout/services/exercise-matcher
  */
 
-function getExerciseRepo() {
-  return ServiceRegistry.getInstance().resolve<IExerciseRepository>(REPO_TOKENS.EXERCISE);
-}
-
-import { ServiceRegistry, REPO_TOKENS } from '@giulio-leone/core';
-import type { IExerciseRepository } from '@giulio-leone/core/repositories';
+import { getExerciseRepo } from '@giulio-leone/core';
 import { SimpleCache } from '@giulio-leone/lib-shared';
 import { createId } from '@giulio-leone/lib-shared/utils';
 import type { ImportedExercise } from '@giulio-leone/schemas';

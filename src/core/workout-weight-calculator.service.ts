@@ -14,8 +14,7 @@ import type {
   SetGroup,
 } from '@giulio-leone/types';
 import { OneRepMaxService } from '../exercise/one-rep-max.service';
-import { ServiceRegistry, REPO_TOKENS } from '@giulio-leone/core';
-import type { IWorkoutRepository } from '@giulio-leone/core/repositories';
+import { getWorkoutRepo } from '@giulio-leone/core';
 import { userProfileService } from '@giulio-leone/lib-core/user-profile.service';
 import { prepareProgramForPersistence } from './transformers/program-transform';
 import { normalizeWorkoutProgram } from './normalizers/workout-normalizer';
@@ -29,10 +28,6 @@ import { logger } from '@giulio-leone/lib-core';
  * @param program - Programma di allenamento
  * @returns Programma con pesi calcolati
  */
-
-function getWorkoutRepo() {
-  return ServiceRegistry.getInstance().resolve<IWorkoutRepository>(REPO_TOKENS.WORKOUT);
-}
 
 export async function calculateWeightsInProgram(
   userId: string,

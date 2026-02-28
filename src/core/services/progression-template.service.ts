@@ -1,13 +1,8 @@
-import { ServiceRegistry, REPO_TOKENS } from '@giulio-leone/core';
-import type { IWorkoutTemplateRepository } from '@giulio-leone/core/repositories';
+import { getWorkoutTemplateRepo as getTemplateRepo } from '@giulio-leone/core';
 import type { ProgressionParams } from './workout-progression.service';
 import type { WorkoutTemplateType } from '@giulio-leone/types';
 
 const PROGRESSION_TEMPLATE_TYPE: WorkoutTemplateType = 'week';
-
-function getTemplateRepo(): IWorkoutTemplateRepository {
-  return ServiceRegistry.getInstance().resolve<IWorkoutTemplateRepository>(REPO_TOKENS.WORKOUT_TEMPLATE);
-}
 
 export interface ProgressionTemplateData extends ProgressionParams {
   name: string;

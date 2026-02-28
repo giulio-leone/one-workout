@@ -7,16 +7,12 @@ import {
   calculateIntensityFromRPE,
 } from '@giulio-leone/one-workout';
 import { kgToLbs, logger } from '@giulio-leone/lib-shared';
-import { ServiceRegistry, REPO_TOKENS } from '@giulio-leone/core';
-import type { IWorkoutRepository, Workout } from '@giulio-leone/core/repositories';
+import { getWorkoutRepo } from '@giulio-leone/core';
+import type { Workout } from '@giulio-leone/core/repositories';
 import { OneRepMaxService } from './one-rep-max.service';
 import type { WorkoutProgram, ExerciseSet, SetGroup } from '@giulio-leone/types/workout';
 
 const log = logger.child('WorkoutWeightCalculatorService');
-
-function getWorkoutRepo() {
-  return ServiceRegistry.getInstance().resolve<IWorkoutRepository>(REPO_TOKENS.WORKOUT);
-}
 
 /**
  * Workout Weight Calculator Service

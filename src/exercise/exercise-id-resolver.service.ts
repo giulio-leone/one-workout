@@ -6,8 +6,7 @@
  * displayed with localized names in the frontend.
  */
 
-import { ServiceRegistry, REPO_TOKENS } from '@giulio-leone/core';
-import type { IExerciseRepository } from '@giulio-leone/core/repositories';
+import { getExerciseRepo } from '@giulio-leone/core';
 import { SimpleCache } from '@giulio-leone/lib-shared';
 
 const DEFAULT_LOCALE = 'en';
@@ -25,10 +24,6 @@ const exerciseCache = new SimpleCache<string, Record<string, ExerciseIdInfo>>({
   max: 200,
   ttl: CACHE_TTL_MS,
 });
-
-function getExerciseRepo() {
-  return ServiceRegistry.getInstance().resolve<IExerciseRepository>(REPO_TOKENS.EXERCISE);
-}
 
 /**
  * Build cache key from exercise IDs and locale

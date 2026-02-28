@@ -159,7 +159,10 @@ export async function updateProgramWeightsForExerciseId(
       }
     }
   } catch (error: unknown) {
-    logger.error('[WorkoutWeightCalculatorService.updateProgramWeightsForExerciseId]', error);
+    logger.error('[WorkoutWeightCalculatorService.updateProgramWeightsForExerciseId]', error, {
+      userId,
+      catalogExerciseId,
+    });
     // Non propagare l'errore: l'aggiornamento dei programmi è best-effort
     // Se fallisce, l'utente può sempre ricalcolare manualmente
   }

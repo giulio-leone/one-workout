@@ -5,8 +5,8 @@
  * Handles initialization, execution, and streaming.
  */
 
-import { resolve } from 'path';
 import { execute, type ProgressCallback } from '@giulio-leone/one-agent/framework';
+import { createLazyService } from '@giulio-leone/lib-shared';
 import { initializeWorkoutSchemas } from '../registry';
 import type {
   WorkoutGenerationInput,
@@ -40,18 +40,18 @@ export interface GenerateOptions {
 // Service State
 // =============================================================================
 
-let isInitialized = false;
-let basePath: string = '';
+const service = createLazyService({
+  name: 'WorkoutGeneration',
+  defaultSubpath: 'submodules/one-workout/src',
+  setup: () => initializeWorkoutSchemas(),
+});
 
 /**
  * Get the basePath for the workout generation agent.
  * Call initializeWorkoutGeneration() first, or this will auto-initialize.
  */
 export function getWorkoutBasePath(): string {
-  if (!isInitialized) {
-    initializeWorkoutGeneration();
-  }
-  return basePath;
+  return service.ensureInitialized();
 }
 
 /**
@@ -60,16 +60,7 @@ export function getWorkoutBasePath(): string {
  * @param options.basePath - Path to one-workout/src directory
  */
 export function initializeWorkoutGeneration(options: { basePath?: string } = {}): void {
-  if (isInitialized) return;
-
-  // Register schemas with SDK registry
-  initializeWorkoutSchemas();
-
-  // Use provided basePath or construct from monorepo root
-  // process.cwd() in Next.js = /path/to/CoachOne/apps/next
-  // We need: /path/to/CoachOne/submodules/one-workout/src
-  basePath = options.basePath ?? resolve(process.cwd(), '../../submodules/one-workout/src');
-  isInitialized = true;
+  service.ensureInitialized(options);
 }
 
 // =============================================================================
@@ -87,10 +78,7 @@ export async function generateWorkoutProgram(
   input: WorkoutGenerationInput,
   options: GenerateOptions = {}
 ): Promise<WorkoutGenerationResult> {
-  // Auto-initialize if needed
-  if (!isInitialized) {
-    initializeWorkoutGeneration();
-  }
+  const basePath = service.ensureInitialized();
 
   const startTime = Date.now();
 

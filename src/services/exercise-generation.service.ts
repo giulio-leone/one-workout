@@ -4,8 +4,8 @@
  * Service layer for executing exercise generation via OneAgent SDK v3.1.
  */
 
-import { resolve } from 'path';
 import { execute, type ProgressCallback } from '@giulio-leone/one-agent/framework';
+import { createLazyService } from '@giulio-leone/lib-shared';
 import { initializeWorkoutSchemas } from '../registry';
 import type {
   ExerciseGenerationInput,
@@ -39,8 +39,11 @@ export interface GenerateOptions {
 // Service State
 // =============================================================================
 
-let isInitialized = false;
-let basePath: string = '';
+const service = createLazyService({
+  name: 'ExerciseGeneration',
+  defaultSubpath: 'submodules/one-workout/src',
+  setup: () => initializeWorkoutSchemas(),
+});
 
 /**
  * Initialize the exercise generation service
@@ -48,14 +51,7 @@ let basePath: string = '';
  * @param options.basePath - Path to one-workout/src directory
  */
 export function initializeExerciseGeneration(options: { basePath?: string } = {}): void {
-  if (isInitialized) return;
-
-  // Register schemas with SDK registry
-  initializeWorkoutSchemas();
-
-  // Use provided basePath or construct from monorepo root
-  basePath = options.basePath ?? resolve(process.cwd(), '../../submodules/one-workout/src');
-  isInitialized = true;
+  service.ensureInitialized(options);
 }
 
 // =============================================================================
@@ -73,10 +69,7 @@ export async function generateExercises(
   input: ExerciseGenerationInput,
   options: GenerateOptions = {}
 ): Promise<ExerciseGenerationResult> {
-  // Auto-initialize if needed
-  if (!isInitialized) {
-    initializeExerciseGeneration();
-  }
+  const basePath = service.ensureInitialized();
 
   const startTime = Date.now();
 

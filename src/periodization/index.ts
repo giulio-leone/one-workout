@@ -32,6 +32,21 @@ export {
   applyPeriodizationToWeeks,
 } from './periodization.service';
 
+// AI generation integration
+export {
+  buildPeriodizationContext,
+  enrichGeneratedProgram,
+  suggestPeriodizationModel,
+} from './integration';
+
+export type {
+  PeriodizationContext,
+  BuildPeriodizationContextParams,
+  GeneratedWeek,
+  GeneratedProgram,
+  EnrichedProgram,
+} from './integration';
+
 // Preset templates
 export {
   PRESET_IDS,

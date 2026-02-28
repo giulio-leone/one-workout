@@ -16,6 +16,7 @@ import { ServiceRegistry, REPO_TOKENS } from '@giulio-leone/core';
 import type { IWorkoutSessionRepository } from '@giulio-leone/core/repositories';
 import type { IWorkoutRepository } from '@giulio-leone/core/repositories';
 import { createId } from '@giulio-leone/lib-shared/id-generator';
+import { deepClone } from '@giulio-leone/lib-shared';
 import { mapToWorkoutSession, mapToWorkoutSessions } from './mappers/workout-session.mapper';
 import { hydrateSetGroups } from './helpers/utils/set-group-helpers';
 import { logger } from '@giulio-leone/lib-core';
@@ -156,7 +157,7 @@ export async function createWorkoutSession(
     // SSOT: setGroups è l'unica fonte di verità per le serie
     // Hydrate setGroups[].sets da baseSet + count usando helper centralizzato
     const exercises = day.exercises
-      ? structuredClone(day.exercises).map((ex: JsonExercise) => {
+      ? deepClone(day.exercises).map((ex: JsonExercise) => {
           if (ex.setGroups && ex.setGroups.length > 0) {
             logger.warn(
               `[createWorkoutSession] Hydrating setGroups for exercise ${ex.name || ex.id}`

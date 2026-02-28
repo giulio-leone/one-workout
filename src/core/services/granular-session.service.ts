@@ -19,9 +19,8 @@ import {
   calculateWeightFromIntensity,
   calculateIntensityFromWeight,
 } from '../calculators/intensity-calculator';
-import { kgToLbs, lbsToKg } from '@giulio-leone/lib-shared';
+import { kgToLbs, lbsToKg, deepClone } from '@giulio-leone/lib-shared';
 import { generateSetsFromGroup } from '../calculators/progression-calculator';
-import { deepClone } from '../helpers/utils';
 import { createId } from '@giulio-leone/lib-shared/id-generator';
 
 // =====================================================

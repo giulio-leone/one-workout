@@ -3,8 +3,7 @@ import {
   calculateWeightFromIntensity,
   calculateIntensityFromWeight,
 } from '../calculators/intensity-calculator';
-import { kgToLbs } from '@giulio-leone/lib-shared';
-import { deepClone } from '../helpers/utils';
+import { kgToLbs, deepClone } from '@giulio-leone/lib-shared';
 
 export type ProgressionType =
   | 'linear_weight'

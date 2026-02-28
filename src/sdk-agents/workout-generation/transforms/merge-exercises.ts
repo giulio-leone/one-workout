@@ -16,6 +16,7 @@
  */
 
 import { z } from 'zod';
+import { deepClone } from '@giulio-leone/lib-shared';
 import { createExerciseMatcher, type CatalogExercise } from '../../../core/utils/exercise-matcher';
 import { WorkoutWeekSchema } from '../schema';
 
@@ -112,7 +113,7 @@ export async function mergeExercises(input: MergeExercisesInput): Promise<MergeE
   const corrections: MergeExercisesOutput['corrections'] = [];
 
   // Deep clone to avoid mutation (structuredClone is faster than JSON.parse/stringify)
-  const validatedWeek: typeof week1Template = structuredClone(week1Template);
+  const validatedWeek: typeof week1Template = deepClone(week1Template);
 
   // Process each day's set groups
   for (const day of validatedWeek.days) {
@@ -195,7 +196,7 @@ export function mergeExercisesSync(input: MergeExercisesInput): MergeExercisesOu
   let correctedCount = 0;
   const corrections: MergeExercisesOutput['corrections'] = [];
 
-  const validatedWeek: typeof week1Template = structuredClone(week1Template);
+  const validatedWeek: typeof week1Template = deepClone(week1Template);
 
   for (const day of validatedWeek.days) {
     if (!day.setGroups || !Array.isArray(day.setGroups)) {

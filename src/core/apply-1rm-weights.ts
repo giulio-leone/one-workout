@@ -16,6 +16,8 @@
 // Using ProgramWithWeeks interface since the actual runtime structure (with setGroups)
 // differs from the static WorkoutProgram type
 
+import { deepClone } from '@giulio-leone/lib-shared';
+
 /**
  * User's 1RM data for an exercise
  */
@@ -119,7 +121,7 @@ export function applyUserOneRepMaxWeights(
   }
 
   // Deep clone to avoid mutation (structuredClone is faster than JSON.parse/stringify)
-  const enrichedProgram: ProgramWithWeeks = structuredClone(program);
+  const enrichedProgram: ProgramWithWeeks = deepClone(program);
 
   // Ensure increment is valid (default to 2.5 if invalid)
   const increment = weightIncrement > 0 ? weightIncrement : 2.5;

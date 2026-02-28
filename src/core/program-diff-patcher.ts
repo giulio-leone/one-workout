@@ -9,6 +9,7 @@
  */
 
 import type { WorkoutWeek, ExerciseSet } from '../sdk-agents/workout-generation/schema';
+import { deepClone } from '@giulio-leone/lib-shared';
 
 /**
  * A single progression change from the AI
@@ -55,16 +56,6 @@ const WEEK_PHASES: Record<number, TrainingPhase> = {
   3: 'intensification',
   4: 'realization',
 };
-
-/**
- * Deep clone an object using structured clone (or JSON fallback)
- */
-function deepClone<T>(obj: T): T {
-  if (typeof structuredClone === 'function') {
-    return structuredClone(obj);
-  }
-  return JSON.parse(JSON.stringify(obj));
-}
 
 /**
  * Apply a single progression change to a week

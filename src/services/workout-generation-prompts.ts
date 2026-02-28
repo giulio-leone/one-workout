@@ -143,7 +143,7 @@ EXPERIENCE LEVEL: ${constraints.difficulty}
 EQUIPMENT: ${constraints.equipment.join(', ')}
 TARGET MUSCLES: ${goals.targetMuscles.join(', ')}
 WEEKLY STRUCTURE: ${weeklyStructure.splitType}
-${weeklyStructure.workouts.length > 0 ? `\nWORKOUT DAYS:\n${weeklyStructure.workouts.map((w) => `- ${w.day}: ${w.focus} (${w.exerciseNames.join(', ')})`).join('\n')}` : ''}
+${weeklyStructure.workouts.length > 0 ? `\nWORKOUT DAYS:\n${weeklyStructure.workouts.map((w: any) => `- ${w.day}: ${w.focus} (${w.exerciseNames.join(', ')})`).join('\n')}` : ''}
 
 SELECTED EXERCISES (use these in your program):
 ${selectedExercisesList}

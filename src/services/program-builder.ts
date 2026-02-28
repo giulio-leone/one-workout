@@ -352,13 +352,13 @@ export function applyProgressionDiff(
 
   // Apply each change
   for (const change of diff.changes) {
-    const day = newWeek.days.find((d) => d.dayNumber === change.dayNumber);
+    const day = newWeek.days.find((d: any) => d.dayNumber === change.dayNumber);
     if (!day) {
       logWarn(
         `[PROGRESSION] Week ${weekNumber}: Day ${change.dayNumber} not found, skipping change`,
         {
           step: 'STEP3',
-          availableDays: newWeek.days.map((d) => d.dayNumber),
+          availableDays: newWeek.days.map((d: any) => d.dayNumber),
         }
       );
       continue;

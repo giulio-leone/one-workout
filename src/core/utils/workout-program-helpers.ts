@@ -47,7 +47,7 @@ export function getWorkoutProgramDay(
   dayNumber: number
 ): WorkoutDay | null {
   const days = getAllWorkoutProgramDays(program);
-  return days.find((d) => d.dayNumber === dayNumber) || null;
+  return days.find((d: any) => d.dayNumber === dayNumber) || null;
 }
 
 /**
@@ -58,11 +58,11 @@ export function getWorkoutProgramDayByWeek(
   weekNumber: number,
   dayNumber: number
 ): WorkoutDay | null {
-  const week = program.weeks?.find((w) => w.weekNumber === weekNumber);
+  const week = program.weeks?.find((w: any) => w.weekNumber === weekNumber);
   if (!week) {
     return null;
   }
-  return week.days?.find((d) => d.dayNumber === dayNumber) || null;
+  return week.days?.find((d: any) => d.dayNumber === dayNumber) || null;
 }
 
 /**
@@ -72,7 +72,7 @@ export function getWorkoutProgramWeek(
   program: WorkoutProgram,
   weekNumber: number
 ): WorkoutWeek | null {
-  return program.weeks?.find((w) => w.weekNumber === weekNumber) || null;
+  return program.weeks?.find((w: any) => w.weekNumber === weekNumber) || null;
 }
 
 /**

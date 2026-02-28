@@ -35,7 +35,7 @@ function countSchemaExerciseSets(exercise: ExerciseWithSetGroups): number {
   if (!exercise.setGroups || exercise.setGroups.length === 0) {
     return 0;
   }
-  return exercise.setGroups.reduce((total, group) => total + group.count, 0);
+  return exercise.setGroups.reduce((total: any, group: any) => total + group.count, 0);
 }
 
 /**
@@ -70,7 +70,7 @@ function calculateSchemaExerciseVolume(exercise: ExerciseWithSetGroups): number 
  */
 export function calculateWarmupDuration(warmup: WarmupSection): number {
   // If exercises have specific durations, sum them
-  const exercisesDuration = warmup.exercises.reduce((sum, ex) => {
+  const exercisesDuration = warmup.exercises.reduce((sum: any, ex: any) => {
     // Each exercise duration in seconds, or default 30s
     return sum + (ex.duration ?? 30);
   }, 0);
@@ -90,7 +90,7 @@ export function calculateWarmupDuration(warmup: WarmupSection): number {
 export function calculateCardioDuration(cardio: CardioExercise): number {
   // If intervals are defined, sum their durations
   if (cardio.intervals && cardio.intervals.length > 0) {
-    return cardio.intervals.reduce((sum, interval) => sum + interval.duration, 0);
+    return cardio.intervals.reduce((sum: any, interval: any) => sum + interval.duration, 0);
   }
 
   // Otherwise use the main duration
@@ -140,8 +140,8 @@ export function calculateExerciseDuration(exercise: ExerciseWithSetGroups): numb
  */
 export function calculateSupersetDuration(superset: Superset): number {
   // Calculate duration of one round
-  const exerciseDurations = superset.exercises.map((ex) => calculateExerciseDuration(ex));
-  const totalExerciseTime = exerciseDurations.reduce((a, b) => a + b, 0);
+  const exerciseDurations = superset.exercises.map((ex: any) => calculateExerciseDuration(ex));
+  const totalExerciseTime = exerciseDurations.reduce((a: any, b: any) => a + b, 0);
 
   // Rest between exercises within superset (minimal)
   const restBetween = superset.restBetweenExercises * (superset.exercises.length - 1);
@@ -162,7 +162,7 @@ export function calculateSupersetDuration(superset: Superset): number {
  */
 export function calculateCircuitDuration(circuit: Circuit): number {
   // Each exercise has reps (assume 3s/rep) or duration
-  const exerciseTime = circuit.exercises.reduce((sum, ex) => {
+  const exerciseTime = circuit.exercises.reduce((sum: any, ex: any) => {
     if (ex.duration) return sum + ex.duration;
     return sum + (ex.reps ?? 10) * 3; // default 10 reps at 3s each
   }, 0);
@@ -213,8 +213,7 @@ export function calculateElementDuration(element: WorkoutElement): number {
  * @returns Total volume (reps × weight)
  */
 export function calculateSupersetVolume(superset: Superset): number {
-  const singleRoundVolume = superset.exercises.reduce(
-    (sum, ex) => sum + calculateSchemaExerciseVolume(ex),
+  const singleRoundVolume = superset.exercises.reduce((sum: any, ex: any) => sum + calculateSchemaExerciseVolume(ex),
     0
   );
   return singleRoundVolume * (superset.rounds ?? 1);
@@ -253,8 +252,7 @@ export function calculateElementVolume(element: WorkoutElement): number {
  * @returns Total set count
  */
 export function countSupersetSets(superset: Superset): number {
-  const singleRoundSets = superset.exercises.reduce(
-    (sum, ex) => sum + countSchemaExerciseSets(ex),
+  const singleRoundSets = superset.exercises.reduce((sum: any, ex: any) => sum + countSchemaExerciseSets(ex),
     0
   );
   return singleRoundSets * (superset.rounds ?? 1);
@@ -310,7 +308,7 @@ export function getElementDisplayName(element: WorkoutElement): string {
     case 'cardio':
       return element.name ?? `Cardio (${element.machine})`;
     case 'superset':
-      return element.name ?? `Superset: ${element.exercises.map((e) => e.name).join(' + ')}`;
+      return element.name ?? `Superset: ${element.exercises.map((e: any) => e.name).join(' + ')}`;
     case 'circuit':
       return element.name ?? 'Circuit';
     case 'exercise':
@@ -343,9 +341,9 @@ export function getElementExerciseIds(element: WorkoutElement): string[] {
     case 'cardio':
       return [element.id]; // Cardio uses its own ID
     case 'superset':
-      return element.exercises.map((ex) => ex.exerciseId);
+      return element.exercises.map((ex: any) => ex.exerciseId);
     case 'circuit':
-      return element.exercises.map((ex) => ex.exerciseId);
+      return element.exercises.map((ex: any) => ex.exerciseId);
     case 'exercise':
     default:
       return [element.exerciseId];

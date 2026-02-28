@@ -104,7 +104,7 @@ export async function fetchBodyMeasurementHistory(
     });
 
     return {
-      measurements: measurements.map((m) => ({
+      measurements: measurements.map((m: any) => ({
         date: m.date,
         weight: m.weight ? Number(m.weight) : null,
         bodyFat: m.bodyFat ? Number(m.bodyFat) : null,
@@ -141,7 +141,7 @@ export async function fetchWorkoutHistory(userId: string, limit = 10): Promise<W
     });
 
     return {
-      programs: programs.map((p) => ({
+      programs: programs.map((p: any) => ({
         id: p.id,
         name: p.name || 'Untitled Program',
         goal: (p.goals as string[])?.[0] || 'general_fitness',
@@ -295,19 +295,19 @@ export async function fetchExerciseCatalog(
 
       serviceLogger.info('Prisma fallback returned', { count: prismaExercises.length });
 
-      const mappedPrisma = prismaExercises.map((ex) => ({
+      const mappedPrisma = prismaExercises.map((ex: any) => ({
         id: ex.id,
         name: ex.exercise_translations[0]?.name || ex.slug,
         category: mapCategory(ex.exercise_types?.name || null),
-        targetMuscles: ex.exercise_muscles.map((em) => em.muscles.name),
-        equipment: ex.exercise_equipments.map((ee) => ee.equipments.name),
+        targetMuscles: ex.exercise_muscles.map((em: any) => em.muscles.name),
+        equipment: ex.exercise_equipments.map((ee: any) => ee.equipments.name),
       }));
 
       exerciseCatalogCache.set(cacheKey, mappedPrisma);
       return mappedPrisma;
     }
 
-    const mappedExercises = rawExercises.map((ex) => ({
+    const mappedExercises = rawExercises.map((ex: any) => ({
       id: ex.id,
       name: ex.name || ex.slug,
       category: mapCategory(ex.category),
@@ -378,7 +378,7 @@ export async function fetchUserMaxes(userId: string): Promise<UserMaxes> {
     });
 
     return {
-      maxes: maxes.map((m) => ({
+      maxes: maxes.map((m: any) => ({
         exerciseId: m.exerciseId,
         exerciseName: m.exercises.exercise_translations[0]?.name || m.exercises.slug,
         value: Number(m.oneRepMax),
@@ -551,11 +551,11 @@ export async function fetchUserMemoryContext(userId: string): Promise<UserMemory
     });
 
     return {
-      preferences: workoutMemory.preferences || {},
-      injuries: workoutMemory.injuries || [],
-      notes: workoutMemory.notes || [],
-      fitnessLevel: fitnessMemory.level || null,
-      recentEvents: recentEvents.map((e) => ({
+      preferences: (workoutMemory.preferences as Record<string, unknown>) || {},
+      injuries: (workoutMemory.injuries as string[]) || [],
+      notes: (workoutMemory.notes as string[]) || [],
+      fitnessLevel: (fitnessMemory.level as string | null) || null,
+      recentEvents: recentEvents.map((e: any) => ({
         type: e.eventType,
         title: e.title,
         date: e.date,

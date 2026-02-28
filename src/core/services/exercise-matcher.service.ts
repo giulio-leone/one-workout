@@ -497,7 +497,7 @@ export class ExerciseMatcherService {
         entry,
         score: jaccardSimilarity(inputNgrams, entry.ngrams),
       }))
-      .filter((c) => c.score > 0.1) // Filtra candidati con score troppo basso
+      .filter((c: any) => c.score > 0.1) // Filtra candidati con score troppo basso
       .sort((a, b) => b.score - a.score)
       .slice(0, maxCandidates);
 
@@ -581,10 +581,10 @@ export class ExerciseMatcherService {
 
     // Prima prova i candidati N-gram (più veloci)
     for (const { entry, score } of ngramCandidates) {
-      const exercise = exercises.find((e) => e.id === entry.exerciseId);
+      const exercise = exercises.find((e: any) => e.id === entry.exerciseId);
       if (!exercise) continue;
 
-      const translation = exercise.translations.find((t) => t.name === entry.name);
+      const translation = exercise.translations.find((t: any) => t.name === entry.name);
       if (!translation) continue;
 
       // Affina con Levenshtein
@@ -622,7 +622,7 @@ export class ExerciseMatcherService {
           let searchTermsSimilarity = 0;
           if (translation.searchTerms.length > 0) {
             const maxSearchTermSimilarity = Math.max(
-              ...translation.searchTerms.map((term) =>
+              ...translation.searchTerms.map((term: any) =>
                 calculateSimilarity(normalizedInput, normalizeName(term))
               )
             );
@@ -673,7 +673,7 @@ export class ExerciseMatcherService {
     scores.sort((a, b) => b.similarity - a.similarity);
 
     // Prepara suggerimenti (top 5)
-    const suggestions = scores.slice(0, 5).map((s) => ({
+    const suggestions = scores.slice(0, 5).map((s: any) => ({
       id: s.exercise.id,
       name: s.translation.name,
       slug: s.exercise.slug,
@@ -724,7 +724,7 @@ export class ExerciseMatcherService {
     await Promise.all([this.loadExercises(locale), this.getNgramIndex(locale)]);
 
     const results = new Map<string, ExerciseMatchResult>();
-    const uniqueNames = [...new Set(exercises.map((e) => e.name))];
+    const uniqueNames = [...new Set(exercises.map((e: any) => e.name))];
 
     // Batch processing con concurrency limit
     const batches: string[][] = [];
@@ -755,7 +755,7 @@ export class ExerciseMatcherService {
     exercises: ImportedExercise[],
     matches: Map<string, ExerciseMatchResult>
   ): ImportedExercise[] {
-    return exercises.map((exercise) => {
+    return exercises.map((exercise: any) => {
       const match = matches.get(exercise.name);
       if (!match) {
         return { ...exercise, notFound: true };

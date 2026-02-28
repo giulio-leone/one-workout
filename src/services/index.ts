@@ -20,11 +20,7 @@ export {
   type ExerciseGenerationResult,
 } from './exercise-generation.service';
 
-// One Rep Max
-export { OneRepMaxService } from './one-rep-max.service';
-
-// Weight Calculator
-export { calculateWeightsInProgram } from './workout-weight-calculator.service';
+// One Rep Max and Weight Calculator are exported from ./exercise and ./core respectively in src/index.ts
 
 // Workout generation pipeline
 export * from './workout-generation-persistence.service';

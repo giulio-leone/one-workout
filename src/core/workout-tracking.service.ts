@@ -367,16 +367,16 @@ export async function getWorkoutProgramStats(
   });
 
   const totalSessions = sessions.length;
-  const completedSessions = sessions.filter((s) => s.completedAt !== null).length;
+  const completedSessions = sessions.filter((s: any) => s.completedAt !== null).length;
   const inProgressSessions = totalSessions - completedSessions;
 
-  const lastSession = sessions.sort((a, b) => b.startedAt.getTime() - a.startedAt.getTime())[0];
+  const lastSession = sessions.sort((a: any, b: any) => b.startedAt.getTime() - a.startedAt.getTime())[0];
 
   // Calculate average duration for completed sessions
-  const completedWithDuration = sessions.filter((s) => s.completedAt !== null && s.startedAt);
+  const completedWithDuration = sessions.filter((s: any) => s.completedAt !== null && s.startedAt);
   const averageDuration =
     completedWithDuration.length > 0
-      ? completedWithDuration.reduce((sum: number, s) => {
+      ? completedWithDuration.reduce((sum: number, s: any) => {
           const duration = (s.completedAt!.getTime() - s.startedAt.getTime()) / (1000 * 60); // minutes
           return sum + duration;
         }, 0) / completedWithDuration.length

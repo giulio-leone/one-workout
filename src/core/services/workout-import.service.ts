@@ -183,7 +183,7 @@ export class WorkoutImportService extends BaseImportService<
       this.parsingErrors.push(`${error.fileName}: ${error.error}`);
     }
     for (const warning of parseResults.warnings) {
-      this.parsingWarnings.push(...warning.warnings.map((w) => `${warning.fileName}: ${w}`));
+      this.parsingWarnings.push(...warning.warnings.map((w: any) => `${warning.fileName}: ${w}`));
     }
 
     if (parseResults.programs.length === 0) {
@@ -241,10 +241,10 @@ export class WorkoutImportService extends BaseImportService<
 
     const matchedExercises = ExerciseMatcherService.applyMatches(allExercises, matches);
 
-    const matchedCount = matchedExercises.filter((e) => !e.notFound).length;
-    const unmatchedCount = matchedExercises.filter((e) => e.notFound).length;
+    const matchedCount = matchedExercises.filter((e: any) => !e.notFound).length;
+    const unmatchedCount = matchedExercises.filter((e: any) => e.notFound).length;
     const unmatchedNames = [
-      ...new Set(matchedExercises.filter((e) => e.notFound).map((e) => e.name)),
+      ...new Set(matchedExercises.filter((e: any) => e.notFound).map((e: any) => e.name)),
     ];
 
     // Step 4: Review (pseudo-step)
@@ -271,9 +271,9 @@ export class WorkoutImportService extends BaseImportService<
         parseResult: {
           program: combinedProgram,
           warnings: this.parsingWarnings,
-          unmatchedExercises: unmatchedNames.map((name) => ({
+          unmatchedExercises: unmatchedNames.map((name: any) => ({
             name,
-            suggestions: (matches.get(name)?.suggestions || []).map((s) => ({
+            suggestions: (matches.get(name)?.suggestions || []).map((s: any) => ({
               id: s.id,
               name: s.name,
               score: s.confidence,
@@ -350,7 +350,7 @@ export class WorkoutImportService extends BaseImportService<
         exercisesMatched: matchedCount,
         exercisesCreated,
         weeksImported: workoutProgram.weeks.length,
-        daysImported: workoutProgram.weeks.reduce((sum, w) => sum + w.days.length, 0),
+        daysImported: workoutProgram.weeks.reduce((sum: any, w: any) => sum + w.days.length, 0),
         creditsUsed: WORKOUT_LIMITS.DEFAULT_CREDIT_COST,
       },
     };
@@ -438,7 +438,7 @@ export class WorkoutImportService extends BaseImportService<
   private convert(imported: ImportedWorkoutProgram, userId: string): WorkoutProgram {
     const now = new Date().toISOString();
     const programId = createId();
-    const weeks: WorkoutWeek[] = imported.weeks.map((week) => this.convertWeek(week));
+    const weeks: WorkoutWeek[] = imported.weeks.map((week: any) => this.convertWeek(week));
 
     return {
       id: programId,
@@ -464,7 +464,7 @@ export class WorkoutImportService extends BaseImportService<
   private convertWeek(imported: ImportedWeek): WorkoutWeek {
     return {
       weekNumber: imported.weekNumber,
-      days: imported.days.map((day) => this.convertDay(day)),
+      days: imported.days.map((day: any) => this.convertDay(day)),
       notes: imported.notes,
       focus: imported.focus,
     };
@@ -475,7 +475,7 @@ export class WorkoutImportService extends BaseImportService<
       dayNumber: imported.dayNumber,
       dayName: imported.name || `Day ${imported.dayNumber}`,
       name: imported.name || `Day ${imported.dayNumber}`,
-      exercises: imported.exercises.map((ex) => this.convertExercise(ex)),
+      exercises: imported.exercises.map((ex: any) => this.convertExercise(ex)),
       totalDuration: imported.duration,
       notes: imported.notes || '',
       targetMuscles: imported.targetMuscles || [],

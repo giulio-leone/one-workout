@@ -129,9 +129,8 @@ function assembleWeeksFromDiffsTransform(rawInput: Record<string, unknown>): unk
     updatedAt: new Date().toISOString(),
     metadata: {
       totalWeeks: weeks.length,
-      totalDays: weeks.reduce((sum, w) => sum + w.days.length, 0),
-      totalExercises: weeks.reduce(
-        (sum, w) => sum + w.days.reduce((daySum, d) => daySum + d.setGroups.length, 0),
+      totalDays: weeks.reduce((sum: any, w: any) => sum + w.days.length, 0),
+      totalExercises: weeks.reduce((sum: any, w: any) => sum + w.days.reduce((daySum: any, d: any) => daySum + d.setGroups.length, 0),
         0
       ),
       durationWeeks,
@@ -187,7 +186,7 @@ function generateProgramName(goals?: WorkoutGoals): string {
  * Determine split type from week template day names
  */
 function determineSplitType(week1Template: WorkoutWeek): string {
-  const dayNames = (week1Template.days ?? []).map((d) => d.dayName?.toLowerCase() ?? '');
+  const dayNames = (week1Template.days ?? []).map((d: any) => d.dayName?.toLowerCase() ?? '');
 
   // Check for push/pull/legs pattern
   const hasPush = dayNames.some((n) => n.includes('push'));

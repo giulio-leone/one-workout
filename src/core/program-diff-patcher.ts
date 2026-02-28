@@ -70,7 +70,7 @@ function deepClone<T>(obj: T): T {
  * Apply a single progression change to a week
  */
 function applyChange(week: WorkoutWeek, change: ProgressionChange): void {
-  const day = week.days.find((d) => d.dayNumber === change.dayNumber);
+  const day = week.days.find((d: any) => d.dayNumber === change.dayNumber);
   if (!day) {
     console.warn(`[DiffPatcher] Day ${change.dayNumber} not found in week ${week.weekNumber}`);
     return;
@@ -198,7 +198,7 @@ export function validateWeeksConsistency(weeks: WorkoutWeek[]): {
 
   const week1 = weeks[0]!;
   const expectedDays = week1.days.length;
-  const expectedExercisesPerDay = week1.days.map((d) => d.setGroups.length);
+  const expectedExercisesPerDay = week1.days.map((d: any) => d.setGroups.length);
 
   for (let i = 1; i < weeks.length; i++) {
     const week = weeks[i]!;

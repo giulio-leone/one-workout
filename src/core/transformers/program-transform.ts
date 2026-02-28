@@ -139,7 +139,7 @@ export function prepareProgramForPersistence(program: WorkoutProgram) {
         targetMuscles: day.targetMuscles ?? [],
         warmup: day.warmup,
         cooldown: day.cooldown,
-        exercises: day.exercises.map((exercise) => ({
+        exercises: day.exercises.map((exercise: any) => ({
           id: exercise.id || createId(),
           name: exercise.name,
           description: exercise.description,

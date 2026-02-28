@@ -5,7 +5,7 @@
  * Manages event encoding and formatting according to Mesh Stream Protocol.
  */
 
-import type { MeshAgentStartEvent, MeshAgentCompleteEvent } from '../../types/mesh-stream';
+import type { MeshAgentStartEvent, MeshAgentCompleteEvent } from '../types/mesh-stream';
 
 // Interface used by API Route logic
 export interface EventSender {
@@ -111,7 +111,7 @@ export function createEventSender(
             label: (typedData.description as string) || (typedData.label as string) || 'Working...',
           },
         };
-        send(event as Record<string, unknown>);
+        send(event as unknown as Record<string, unknown>);
       } else if (name === 'agent_complete') {
         const event: MeshAgentCompleteEvent = {
           type: 'agent_complete',
@@ -121,7 +121,7 @@ export function createEventSender(
             durationMs: (typedData.durationMs as number) || (typedData.duration as number),
           },
         };
-        send(event as Record<string, unknown>);
+        send(event as unknown as Record<string, unknown>);
       } else {
         // Fallback for custom events
         send({ type: name, timestamp: new Date().toISOString(), data });

@@ -259,12 +259,12 @@ export class ExerciseMatcher {
 
     // 6. Category + muscle fallback
     if (category || targetMuscles?.length) {
-      const candidates = this.catalog.filter((ex) => {
+      const candidates = this.catalog.filter((ex: any) => {
         const categoryMatch = !category || ex.category === category;
         const muscleMatch =
           !targetMuscles?.length ||
           targetMuscles.some((m) =>
-            ex.targetMuscles?.some((tm) => tm.toLowerCase().includes(m.toLowerCase()))
+            ex.targetMuscles?.some((tm: string) => tm.toLowerCase().includes(m.toLowerCase()))
           );
         return categoryMatch && muscleMatch;
       });

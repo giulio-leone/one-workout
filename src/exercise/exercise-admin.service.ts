@@ -79,7 +79,7 @@ const exerciseImportSchemaBase = z.intersection(
 );
 
 // Validazione esplicita per assicurarsi che i campi obbligatori siano sempre presenti
-export const exerciseImportSchema = exerciseImportSchemaBase.superRefine((data, ctx) => {
+export const exerciseImportSchema = exerciseImportSchemaBase.superRefine((data: any, ctx) => {
   // Verifica translations
   if (!data.translations || !Array.isArray(data.translations) || data.translations.length === 0) {
     ctx.addIssue({
@@ -185,7 +185,9 @@ const EXERCISE_EXPORT_INCLUDE = {
   },
 } as const;
 
-export type ExerciseImportPayload = z.infer<typeof exerciseImportSchema>;
+export type ExerciseImportPayload = z.infer<typeof createExerciseSchema> & {
+  approvalStatus?: ExerciseApprovalStatus;
+};
 export type ExerciseAiPlan = z.infer<typeof exerciseAiPlanSchema>;
 
 interface RelationReference {
@@ -289,7 +291,7 @@ export class ExerciseAdminService {
       orderBy: { createdAt: 'asc' },
     });
 
-    return exercises.map((exercise) => this.formatExportRecord(exercise));
+    return exercises.map((exercise: any) => this.formatExportRecord(exercise));
   }
 
   /**
@@ -314,7 +316,7 @@ export class ExerciseAdminService {
     }
 
     const normalizedRecords = await Promise.all(
-      records.map((record) => this.normalizeImportRecord(record, options.sharedContext))
+      records.map((record: any) => this.normalizeImportRecord(record, options.sharedContext))
     );
     const slugCache = new Map<string, string>();
 
@@ -441,7 +443,7 @@ export class ExerciseAdminService {
       })
     );
 
-    const english = translations.find((translation) => translation.locale === DEFAULT_LOCALE);
+    const english = translations.find((translation: any) => translation.locale === DEFAULT_LOCALE);
     if (!english) {
       throw new Error("È necessaria una traduzione in inglese per importare l'esercizio");
     }
@@ -482,7 +484,7 @@ export class ExerciseAdminService {
     }
 
     // Muscoli: usa solo ID (obbligatorio)
-    const muscles = payload.muscles.map((muscle) => ({
+    const muscles = payload.muscles.map((muscle: any) => ({
       id: muscle.id, // ID è obbligatorio, non più opzionale
       role: muscle.role,
     }));
@@ -650,20 +652,20 @@ export class ExerciseAdminService {
       instructions: [...exercise.instructions],
       exerciseTips: [...exercise.exerciseTips],
       variations: [...exercise.variations],
-      translations: exercise.exercise_translations.map((translation) => ({
+      translations: exercise.exercise_translations.map((translation: any) => ({
         locale: translation.locale.toLowerCase(),
         name: translation.name,
         shortName: translation.shortName ?? null,
         description: translation.description ?? null,
         searchTerms: translation.searchTerms ?? [],
       })),
-      muscles: exercise.exercise_muscles.map((muscle) => ({
+      muscles: exercise.exercise_muscles.map((muscle: any) => ({
         id: muscle.muscleId,
         role: muscle.role,
       })),
-      bodyPartIds: exercise.exercise_body_parts.map((bodyPart) => bodyPart.bodyPartId),
-      equipmentIds: exercise.exercise_equipments.map((equipment) => equipment.equipmentId),
-      relatedExercises: exercise.relatedFrom.map((relation) => ({
+      bodyPartIds: exercise.exercise_body_parts.map((bodyPart: any) => bodyPart.bodyPartId),
+      equipmentIds: exercise.exercise_equipments.map((equipment: any) => equipment.equipmentId),
+      relatedExercises: exercise.relatedFrom.map((relation: any) => ({
         id: relation.toId,
         relation: relation.relation,
         direction: 'outbound' as const,

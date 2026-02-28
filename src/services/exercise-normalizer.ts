@@ -29,8 +29,8 @@ type RawJson = Record<string, unknown>;
 export function normalizeMuscleGroups(value: unknown): Exercise['muscleGroups'] {
   const rawGroups = ensureArrayOfStrings(value).map((group: string) => group.toLowerCase());
   const filtered = rawGroups
-    .map((group) => getMuscleGroupFromName(group))
-    .filter((group): group is MuscleGroup => group !== null);
+    .map((group: any) => getMuscleGroupFromName(group))
+    .filter((group: any): group is MuscleGroup => group !== null);
   return filtered.length > 0 ? filtered : [];
 }
 
@@ -56,7 +56,7 @@ export function normalizeExerciseSets(value: unknown): ExerciseSet[] {
   }
 
   const sets = value
-    .map((entry) => {
+    .map((entry: any) => {
       if (!entry || typeof entry !== 'object') {
         return { ...DEFAULT_SET };
       }
@@ -130,7 +130,7 @@ export function normalizeSetProgression(raw: unknown): SetProgression | undefine
   if (type !== 'linear' && type !== 'percentage' && type !== 'rpe') return undefined;
 
   const steps = ensureArray(progression.steps)
-    .map((step) => {
+    .map((step: any) => {
       if (!step || typeof step !== 'object') return null;
       const s = step as RawJson;
       return {
@@ -225,7 +225,7 @@ export function normalizeExercise(
 
   const ensureMuscleGroups = (value: unknown): MuscleGroup[] => {
     if (Array.isArray(value)) {
-      const groups = value.map((entry) => normalizeMuscleGroupLabel(entry)).filter(Boolean);
+      const groups = value.map((entry: any) => normalizeMuscleGroupLabel(entry)).filter(Boolean);
       return groups.length > 0 ? groups : ['full-body'];
     }
     if (typeof value === 'string') {
@@ -248,7 +248,7 @@ export function normalizeExercise(
   // Prima controlla se ci sono già setGroups definiti
   if (raw.setGroups && Array.isArray(raw.setGroups) && raw.setGroups.length > 0) {
     const groups = raw.setGroups
-      .map((g) => normalizeSetGroup(g))
+      .map((g: any) => normalizeSetGroup(g))
       .filter((g): g is SetGroup => g !== null);
     if (groups.length > 0) {
       setGroups = groups;
@@ -313,19 +313,19 @@ export function normalizeExercise(
     repRange:
       typeof rawReps === 'string' ? rawReps : repsNumber !== undefined ? `${repsNumber}` : '',
     formCues: Array.isArray(raw.formCues)
-      ? raw.formCues.map((cue) => ensureString(cue)).filter(Boolean)
+      ? raw.formCues.map((cue: any) => ensureString(cue)).filter(Boolean)
       : typeof raw.formCues === 'string'
         ? raw.formCues
             .split(/\r?\n|\./)
-            .map((entry) => ensureString(entry).trim())
+            .map((entry: any) => ensureString(entry).trim())
             .filter(Boolean)
         : [],
     equipment: Array.isArray(raw.equipment)
-      ? raw.equipment.map((item) => ensureString(item)).filter(Boolean)
+      ? raw.equipment.map((item: any) => ensureString(item)).filter(Boolean)
       : typeof raw.equipment === 'string'
         ? raw.equipment
             .split(/,|\//)
-            .map((entry) => ensureString(entry).trim())
+            .map((entry: any) => ensureString(entry).trim())
             .filter(Boolean)
         : [],
     catalogExerciseId:

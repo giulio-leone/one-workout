@@ -84,7 +84,7 @@ export function normalizeToElements(day: WorkoutDay): WorkoutDay {
  * @returns Weeks with all days normalized to elements[]
  */
 export function normalizeWeeksToElements<T extends { days: WorkoutDay[] }>(weeks: T[]): T[] {
-  return weeks.map((week) => ({
+  return weeks.map((week: any) => ({
     ...week,
     days: week.days.map(normalizeToElements),
   }));
@@ -146,9 +146,9 @@ export function normalizeToLegacy(day: WorkoutDay): WorkoutDay {
   const exercises = elementsToExercises(day.elements);
 
   // Extract warmup text if there's a warmup element
-  const warmupElement = day.elements.find((e) => e.type === 'warmup');
+  const warmupElement = day.elements.find((e: any) => e.type === 'warmup');
   const warmupText = warmupElement
-    ? warmupElement.exercises.map((e) => e.name).join(', ')
+    ? (warmupElement as any).exercises.map((e: any) => e.name).join(', ')
     : day.warmup;
 
   return {

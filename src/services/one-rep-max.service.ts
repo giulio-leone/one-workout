@@ -1,7 +1,7 @@
 import { logError, logger as sharedLogger } from '@giulio-leone/lib-shared';
 import { prisma } from '@giulio-leone/lib-core';
 
-import { Prisma } from '@prisma/client';
+import { Prisma, Visibility } from '@prisma/client';
 import type { user_one_rep_max as UserOneRepMax } from '@prisma/client';
 import type {
   UserOneRepMaxWithExercise,
@@ -46,7 +46,7 @@ export class OneRepMaxService {
         serviceLogger.error('userOneRepMax model not available in Prisma client');
         serviceLogger.debug('Available models:', {
           models: Object.keys(prisma)
-            .filter((k) => typeof k === 'string' && !k.startsWith('$'))
+            .filter((k: any) => typeof k === 'string' && !k.startsWith('$'))
             .join(', '),
         });
         return {
@@ -237,7 +237,7 @@ export class OneRepMaxService {
               notes: input.notes ?? null,
               version: newVersion,
               lastUpdated: new Date(),
-              visibility: input.visibility ?? existingMax.visibility,
+              visibility: (input.visibility ?? existingMax.visibility) as Visibility,
               assignedToUserId: input.assignedToUserId ?? existingMax.assignedToUserId,
               assignedByCoachId: input.assignedByCoachId ?? existingMax.assignedByCoachId,
             },
@@ -284,7 +284,7 @@ export class OneRepMaxService {
             (normalized as unknown as Record<string, unknown>).exercise = {
               id: exerciseData.id,
               slug: exerciseData.slug,
-              translations: exerciseData.exercise_translations.map((t) => ({
+              translations: exerciseData.exercise_translations.map((t: any) => ({
                 name: t.name,
                 locale: t.locale,
               })),
@@ -305,7 +305,7 @@ export class OneRepMaxService {
           oneRepMax: input.oneRepMax,
           notes: input.notes ?? null,
           version: 1,
-          visibility: input.visibility ?? 'PRIVATE',
+          visibility: (input.visibility ?? 'PRIVATE') as Visibility,
           assignedToUserId: input.assignedToUserId ?? null,
           assignedByCoachId: input.assignedByCoachId ?? null,
         },

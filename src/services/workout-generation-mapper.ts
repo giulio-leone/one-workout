@@ -108,7 +108,7 @@ export function mapAISetGroupToSetGroup(aiSetGroup: AISetGroup): SetGroup {
   // 2. Expansion logic: Generate individual sets based on count
   // AI might provide explicit sets, or we generate them from baseSet (with pyramid support)
   const sets: ExerciseSet[] =
-    aiSetGroup.sets?.map((s, index) => ({
+    aiSetGroup.sets?.map((s: any, index: any) => ({
       reps: s.reps ?? (Array.isArray(aiBaseSet.reps) ? aiBaseSet.reps[index] : baseSet.reps),
       repsMax:
         s.repsMax ??
@@ -216,8 +216,7 @@ export function mapAIExerciseToExercise(aiExercise: AIExercise): Exercise {
           id: crypto.randomUUID(),
           count,
           baseSet,
-          sets: legacySets.map(
-            (s) =>
+          sets: legacySets.map((s: any) =>
               ({
                 ...baseSet,
                 ...s,
@@ -306,7 +305,7 @@ export function mapAIProgramToWorkoutProgram(
   durationWeeks?: number
 ): WorkoutProgram {
   const now = new Date().toISOString();
-  const weeks = aiProgram.weeks?.map((w, i) => mapAIWeekToWorkoutWeek(w, i + 1)) ?? [];
+  const weeks = aiProgram.weeks?.map((w: any, i: any) => mapAIWeekToWorkoutWeek(w, i + 1)) ?? [];
 
   return {
     id: crypto.randomUUID(),
@@ -482,7 +481,7 @@ export function mapSdkProgramToWorkoutProgram(sdkProgram: SdkProgram): WorkoutPr
     status: 'ACTIVE',
     goals: Array.isArray(sdkProgram.goals)
       ? sdkProgram.goals
-      : [sdkProgram.primaryGoal].filter(Boolean),
+      : [sdkProgram.primaryGoal].filter((x): x is string => x !== undefined),
     weeks,
     createdAt: sdkProgram.createdAt ?? now,
     updatedAt: now,

@@ -107,9 +107,9 @@ export async function calculateWeightsInProgram(
   // Raccogli tutti i catalogExerciseId presenti nel programma
   const weeks = program.weeks ?? [];
   const exerciseIds = new Set<string>();
-  weeks.forEach((week) =>
-    week.days.forEach((day) =>
-      day.exercises.forEach((exercise) => {
+  weeks.forEach((week: any) =>
+    week.days.forEach((day: any) =>
+      day.exercises.forEach((exercise: any) => {
         if (exercise.catalogExerciseId) {
           exerciseIds.add(exercise.catalogExerciseId);
         }
@@ -132,11 +132,11 @@ export async function calculateWeightsInProgram(
 
   const updatedProgram: WorkoutProgram = {
     ...program,
-    weeks: weeks.map((week) => ({
+    weeks: weeks.map((week: any) => ({
       ...week,
-      days: week.days.map((day) => ({
+      days: week.days.map((day: any) => ({
         ...day,
-        exercises: day.exercises.map((exercise) => {
+        exercises: day.exercises.map((exercise: any) => {
           // Se l'esercizio non ha catalogExerciseId, non possiamo calcolare i pesi
           if (!exercise.catalogExerciseId) {
             return exercise;
@@ -149,10 +149,10 @@ export async function calculateWeightsInProgram(
           }
 
           // SSOT: Update setGroups with calculated weights
-          const updatedSetGroups: SetGroup[] = (exercise.setGroups || []).map((group) => ({
+          const updatedSetGroups: SetGroup[] = (exercise.setGroups || []).map((group: any) => ({
             ...group,
             baseSet: calculateSetWeights(group.baseSet, oneRepMaxKg),
-            sets: (group.sets || []).map((set) => calculateSetWeights(set, oneRepMaxKg)),
+            sets: (group.sets || []).map((set: any) => calculateSetWeights(set, oneRepMaxKg)),
           }));
 
           return {
@@ -226,7 +226,7 @@ export async function updateProgramWeightsForExerciseId(
     }
 
     // 3. Aggiorna i programmi in parallelo
-    const updatePromises = programs.map(async (program) => {
+    const updatePromises = programs.map(async (program: any) => {
       log.debug(`[updateProgramWeightsForExerciseId] Processing program: ${program.id}`);
 
       const normalizedProgram = normalizeWorkoutProgram(program as unknown as workout_programs);
@@ -234,11 +234,11 @@ export async function updateProgramWeightsForExerciseId(
       let exercisesUpdated = 0;
 
       // Aggiorna SOLO gli esercizi che usano questo catalogExerciseId
-      const updatedWeeks = normalizedProgram.weeks.map((week) => ({
+      const updatedWeeks = normalizedProgram.weeks.map((week: any) => ({
         ...week,
-        days: week.days.map((day) => ({
+        days: week.days.map((day: any) => ({
           ...day,
-          exercises: day.exercises.map((exercise) => {
+          exercises: day.exercises.map((exercise: any) => {
             if (exercise.catalogExerciseId !== catalogExerciseId) {
               return exercise; // Salta esercizi che non usiamo
             }
@@ -252,9 +252,9 @@ export async function updateProgramWeightsForExerciseId(
 
             // Ricalcola i pesi per questo esercizio
             const updatedSetGroups: SetGroup[] = (exercise.setGroups || []).map(
-              (group, groupIdx) => {
+              (group: any, groupIdx: any) => {
                 const updatedBaseSet = calculateSetWeights(group.baseSet, oneRepMaxKg);
-                const updatedSets = (group.sets || []).map((set) =>
+                const updatedSets = (group.sets || []).map((set: any) =>
                   calculateSetWeights(set, oneRepMaxKg)
                 );
 
@@ -267,7 +267,7 @@ export async function updateProgramWeightsForExerciseId(
                 // Verifica se c'è un cambiamento nei pesi
                 if (
                   updatedBaseSet.weight !== group.baseSet.weight ||
-                  updatedSets.some((s, i) => s.weight !== group.sets?.[i]?.weight)
+                  updatedSets.some((s: any, i: any) => s.weight !== group.sets?.[i]?.weight)
                 ) {
                   hasChanges = true;
                 }

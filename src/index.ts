@@ -41,3 +41,6 @@ export {
 
 // Exercise services (merged from lib-exercise)
 export * from './exercise';
+
+export { LocalizedExerciseSchema } from './sdk-agents/workout-generation/transforms/merge-exercises';
+export type { LocalizedExercise } from './sdk-agents/workout-generation/transforms/merge-exercises';

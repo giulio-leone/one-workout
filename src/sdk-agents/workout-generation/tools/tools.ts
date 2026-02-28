@@ -179,14 +179,13 @@ export const exerciseMatch = {
     const normalized = searchName.toLowerCase().trim();
 
     // Exact match first
-    const exactMatch = catalog.find((e) => e.name.toLowerCase() === normalized);
+    const exactMatch = catalog.find((e: any) => e.name.toLowerCase() === normalized);
     if (exactMatch) {
       return { match: exactMatch, confidence: 1.0, method: 'exact' };
     }
 
     // Contains match
-    const containsMatch = catalog.find(
-      (e) => e.name.toLowerCase().includes(normalized) || normalized.includes(e.name.toLowerCase())
+    const containsMatch = catalog.find((e: any) => e.name.toLowerCase().includes(normalized) || normalized.includes(e.name.toLowerCase())
     );
     if (containsMatch) {
       return { match: containsMatch, confidence: 0.8, method: 'contains' };
@@ -199,7 +198,7 @@ export const exerciseMatch = {
 
     for (const exercise of catalog) {
       const exerciseWords = exercise.name.toLowerCase().split(/\s+/);
-      const overlap = searchWords.filter((w) =>
+      const overlap = searchWords.filter((w: any) =>
         exerciseWords.some((ew) => ew.includes(w) || w.includes(ew))
       );
       const score = overlap.length / Math.max(searchWords.length, exerciseWords.length);
@@ -308,7 +307,7 @@ export const analyzeWeeklyVolume = {
       volumeByMuscle,
       frequencyByMuscle,
       analysis,
-      totalSets: Object.values(volumeByMuscle).reduce((a, b) => a + b, 0),
+      totalSets: Object.values(volumeByMuscle).reduce((a: any, b: any) => a + b, 0),
     };
   },
 };

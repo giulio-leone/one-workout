@@ -501,7 +501,7 @@ export function duplicateSetGroup(
   if (duplicatedGroup.progression) {
     duplicatedGroup.progression = {
       ...duplicatedGroup.progression,
-      steps: duplicatedGroup.progression.steps.map((s) => ({ ...s })),
+      steps: duplicatedGroup.progression.steps.map((s: any) => ({ ...s })),
     };
   }
 

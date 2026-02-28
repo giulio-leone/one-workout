@@ -126,10 +126,10 @@ export interface GranularOperationResult {
  * Validates a session target against a program
  */
 function validateTarget(program: WorkoutProgram, target: SessionTarget): string | null {
-  const week = program.weeks.find((w) => w.weekNumber === target.weekNumber);
+  const week = program.weeks.find((w: any) => w.weekNumber === target.weekNumber);
   if (!week) return `Week ${target.weekNumber} not found`;
 
-  const day = week.days.find((d) => d.dayNumber === target.dayNumber);
+  const day = week.days.find((d: any) => d.dayNumber === target.dayNumber);
   if (!day) return `Day ${target.dayNumber} not found in week ${target.weekNumber}`;
 
   const exercise = day.exercises[target.exerciseIndex];
@@ -153,10 +153,10 @@ function validateTarget(program: WorkoutProgram, target: SessionTarget): string 
  * Gets the exercise at a target location
  */
 function getExerciseAtTarget(program: WorkoutProgram, target: SessionTarget): Exercise | null {
-  const week = program.weeks.find((w) => w.weekNumber === target.weekNumber);
+  const week = program.weeks.find((w: any) => w.weekNumber === target.weekNumber);
   if (!week) return null;
 
-  const day = week.days.find((d) => d.dayNumber === target.dayNumber);
+  const day = week.days.find((d: any) => d.dayNumber === target.dayNumber);
   if (!day) return null;
 
   return day.exercises[target.exerciseIndex] || null;
@@ -217,7 +217,7 @@ export class GranularSessionService {
       setGroup.baseSet = { ...setGroup.baseSet, ...processedUpdates };
 
       // Update all sets in the group
-      setGroup.sets = setGroup.sets.map((set) => ({
+      setGroup.sets = setGroup.sets.map((set: any) => ({
         ...set,
         ...processedUpdates,
       }));

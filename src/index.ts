@@ -39,6 +39,9 @@ export {
   REST_OPTIONS,
 } from './core/helpers/utils/range-parser';
 
+// Periodization domain model & engine (M2-I1, M2-I2)
+export * from './periodization';
+
 // Exercise services (merged from lib-exercise)
 export * from './exercise';
 

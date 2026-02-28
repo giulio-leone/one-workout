@@ -115,12 +115,13 @@ export async function generateWorkoutProgram(
         },
       };
     } else {
-      console.error('[WorkoutGeneration] Failed:', result.error);
+      const failedResult = result as { error?: { message: string; code: string; recoverable: boolean } };
+      console.error('[WorkoutGeneration] Failed:', failedResult.error);
       return {
         success: false,
         error: {
-          message: result.error?.message ?? 'Unknown error',
-          code: result.error?.code ?? 'GENERATION_ERROR',
+          message: failedResult.error?.message ?? 'Unknown error',
+          code: failedResult.error?.code ?? 'GENERATION_ERROR',
         },
         meta: {
           durationMs,

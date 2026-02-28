@@ -104,12 +104,13 @@ export async function generateExercises(
         },
       };
     } else {
-      console.error('[ExerciseGeneration] Failed:', result.error);
+      const failedResult = result as { error?: { message: string; code: string; recoverable: boolean } };
+      console.error('[ExerciseGeneration] Failed:', failedResult.error);
       return {
         success: false,
         error: {
-          message: result.error?.message ?? 'Unknown error',
-          code: result.error?.code ?? 'GENERATION_ERROR',
+          message: failedResult.error?.message ?? 'Unknown error',
+          code: failedResult.error?.code ?? 'GENERATION_ERROR',
         },
         meta: {
           durationMs,

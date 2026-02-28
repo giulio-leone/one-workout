@@ -146,7 +146,7 @@ export function getWeekPeriodization(
   // Linearly interpolate RPE across weeks within the phase
   const rpeProgress = phase.durationWeeks > 1
     ? (weekInPhase - 1) / (phase.durationWeeks - 1)
-    : 0.5;
+    : 1.0;
   const targetRPE = Math.round((rpeMin + rpeProgress * (rpeMax - rpeMin)) * 10) / 10;
 
   return {

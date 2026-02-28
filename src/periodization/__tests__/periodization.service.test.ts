@@ -215,10 +215,10 @@ describe('getWeekPeriodization', () => {
     expect(w2.targetRPE).toBeLessThan(w3.targetRPE);
   });
 
-  it('uses midpoint RPE for single-week phase', () => {
-    // realization: 1 week, rpeRange [8.5, 9.5], progress=0.5
+  it('uses end-of-range RPE for single-week phase', () => {
+    // realization: 1 week, rpeRange [8.5, 9.5], progress=1.0
     const wp = getWeekPeriodization(meso, 7);
-    expect(wp.targetRPE).toBe(9.0); // midpoint
+    expect(wp.targetRPE).toBe(9.5); // end of range
   });
 
   it('weekInPhase resets when phase changes', () => {

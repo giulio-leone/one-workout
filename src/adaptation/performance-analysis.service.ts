@@ -180,9 +180,9 @@ export function detectPlateaus(
     // Calculate weeks since last PR
     const lastRecordDate = new Date(sorted[sorted.length - 1]!.date);
     const prDate = new Date(lastPRDate);
-    const weeksSincePR = Math.floor(
+    const weeksSincePR = Math.max(0, Math.floor(
       (lastRecordDate.getTime() - prDate.getTime()) / (7 * 24 * 60 * 60 * 1000)
-    );
+    ));
 
     if (weeksSincePR >= windowWeeks) {
       const exerciseName = sorted[0]!.exerciseName ?? exerciseId;

@@ -21,3 +21,7 @@ export function createId(): string {
   return 'mock-' + Math.random().toString(36).slice(2, 11);
 }
 
+export function toExerciseArrayTyped(arr: unknown[]): unknown[] {
+  return arr;
+}
+

@@ -13,6 +13,8 @@ export const ServiceRegistry = {
     }
     return service as T;
   },
+  /** Singleton accessor — returns itself in tests */
+  getInstance: () => ServiceRegistry,
   register: (token: string, factory: () => unknown) => {
     registryStore.set(token, factory());
   },

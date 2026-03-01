@@ -60,7 +60,7 @@
     "@giulio-leone/one-agent": "workspace:*",
     "@giulio-leone/schemas": "workspace:*",
     "@giulio-leone/types": "workspace:*",
-    "ai": "6.0.77",
+    "ai": "6.0.105",
     "xlsx": "^0.18.5",
     "zod": "4.3.6"
   },
@@ -71,7 +71,7 @@
     "@types/node": "^25.3.3",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.16"
+    "vitest": "^4.0.18"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",

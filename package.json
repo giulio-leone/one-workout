@@ -57,7 +57,6 @@
     "@giulio-leone/core": "workspace:*",
     "@giulio-leone/lib-core": "workspace:*",
     "@giulio-leone/lib-shared": "workspace:*",
-    "@giulio-leone/one-agent": "workspace:*",
     "@giulio-leone/schemas": "workspace:*",
     "@giulio-leone/types": "workspace:*",
     "ai": "6.0.105",

@@ -1,11 +1,12 @@
 /**
  * Workout Generation Service
  *
- * Service layer for executing workout generation via OneAgent SDK v3.0.
- * Handles initialization, execution, and streaming.
+ * DEPRECATED: Legacy SDK v3.0 service. Workout generation now uses Gauss agents.
+ * Kept for type exports only.
  */
 
-import { execute, type ProgressCallback } from '@giulio-leone/one-agent/framework';
+// Legacy execute removed — use Gauss Agent.run() via gauss-agents package
+type ProgressCallback = (event: { step: string; message: string; progress: number }) => void;
 import { createLazyService } from '@giulio-leone/lib-shared';
 import { initializeWorkoutSchemas } from '../registry';
 import type {
@@ -78,62 +79,8 @@ export async function generateWorkoutProgram(
   input: WorkoutGenerationInput,
   options: GenerateOptions = {}
 ): Promise<WorkoutGenerationResult> {
-  const basePath = service.ensureInitialized();
-
-  const startTime = Date.now();
-
-  try {
-    // Execute via SDK with onProgress callback
-    const result = await execute<WorkoutGenerationOutput>('sdk-agents/workout-generation', input, {
-      userId: input.userId,
-      basePath,
-      onProgress: options.onProgress,
-    });
-
-    const durationMs = Date.now() - startTime;
-
-    if (result.success && result.output) {
-      return {
-        success: true,
-        output: result.output,
-        meta: {
-          durationMs,
-          tokensUsed: result.meta.tokensUsed,
-          costUSD: result.meta.costUSD,
-        },
-      };
-    } else {
-      const failedResult = result as { error?: { message: string; code: string; recoverable: boolean } };
-      console.error('[WorkoutGeneration] Failed:', failedResult.error);
-      return {
-        success: false,
-        error: {
-          message: failedResult.error?.message ?? 'Unknown error',
-          code: failedResult.error?.code ?? 'GENERATION_ERROR',
-        },
-        meta: {
-          durationMs,
-          tokensUsed: result.meta.tokensUsed,
-          costUSD: result.meta.costUSD,
-        },
-      };
-    }
-  } catch (error) {
-    const durationMs = Date.now() - startTime;
-    console.error('[WorkoutGeneration] Exception:', error);
-    return {
-      success: false,
-      error: {
-        message: error instanceof Error ? error.message : String(error),
-        code: 'EXCEPTION',
-      },
-      meta: {
-        durationMs,
-        tokensUsed: 0,
-        costUSD: 0,
-      },
-    };
-  }
+  // Legacy SDK execute() removed — use Gauss Agent.run() via gauss-agents package
+  throw new Error('Legacy generateWorkoutProgram() is deprecated. Use Gauss workout agent instead.');
 }
 
 // =============================================================================

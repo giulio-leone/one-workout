@@ -1,10 +1,12 @@
 /**
  * Exercise Generation Service
  *
- * Service layer for executing exercise generation via OneAgent SDK v3.1.
+ * DEPRECATED: Legacy SDK v3.1 service. Exercise generation now uses Gauss agents.
+ * Kept for type exports only.
  */
 
-import { execute, type ProgressCallback } from '@giulio-leone/one-agent/framework';
+// Legacy execute removed — use Gauss Agent.run() via gauss-agents package
+type ProgressCallback = (event: { step: string; message: string; progress: number }) => void;
 import { createLazyService } from '@giulio-leone/lib-shared';
 import { initializeWorkoutSchemas } from '../registry';
 import type {
@@ -69,65 +71,8 @@ export async function generateExercises(
   input: ExerciseGenerationInput,
   options: GenerateOptions = {}
 ): Promise<ExerciseGenerationResult> {
-  const basePath = service.ensureInitialized();
-
-  const startTime = Date.now();
-
-  try {
-    // Execute via SDK with onProgress callback
-    const result = await execute<ExerciseGenerationOutput>(
-      'sdk-agents/exercise-generation',
-      input,
-      {
-        basePath,
-        onProgress: options.onProgress,
-      }
-    );
-
-    const durationMs = Date.now() - startTime;
-
-    if (result.success && result.output) {
-      return {
-        success: true,
-        output: result.output,
-        meta: {
-          durationMs,
-          tokensUsed: result.meta.tokensUsed,
-          costUSD: result.meta.costUSD,
-        },
-      };
-    } else {
-      const failedResult = result as { error?: { message: string; code: string; recoverable: boolean } };
-      console.error('[ExerciseGeneration] Failed:', failedResult.error);
-      return {
-        success: false,
-        error: {
-          message: failedResult.error?.message ?? 'Unknown error',
-          code: failedResult.error?.code ?? 'GENERATION_ERROR',
-        },
-        meta: {
-          durationMs,
-          tokensUsed: result.meta.tokensUsed,
-          costUSD: result.meta.costUSD,
-        },
-      };
-    }
-  } catch (error) {
-    const durationMs = Date.now() - startTime;
-    console.error('[ExerciseGeneration] Exception:', error);
-    return {
-      success: false,
-      error: {
-        message: error instanceof Error ? error.message : String(error),
-        code: 'EXCEPTION',
-      },
-      meta: {
-        durationMs,
-        tokensUsed: 0,
-        costUSD: 0,
-      },
-    };
-  }
+  // Legacy SDK execute() removed — use Gauss Agent.run() via gauss-agents package
+  throw new Error('Legacy generateExercises() is deprecated. Use Gauss exercise agent instead.');
 }
 
 // =============================================================================

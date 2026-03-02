@@ -5,7 +5,11 @@
  * Call initializeWorkoutSchemas() before executing workout agents.
  */
 
-import { registerSchemas, registerTools } from '@giulio-leone/one-agent/framework';
+import { z } from 'zod';
+
+// Local stubs replacing @giulio-leone/one-agent/framework (legacy SDK removed)
+function registerSchemas(_schemas: Record<string, z.ZodSchema>): void { /* no-op */ }
+function registerTools(_tools: Record<string, Record<string, unknown>>): void { /* no-op */ }
 
 // ==================== MAIN COORDINATOR SCHEMAS ====================
 

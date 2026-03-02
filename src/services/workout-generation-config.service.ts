@@ -7,7 +7,7 @@
  * Single Responsibility: Configuration only
  */
 
-import { AIModelService, AIFrameworkConfigService, FrameworkFeature } from '@giulio-leone/lib-ai';
+import { AIModelService, AIFrameworkConfigService, FrameworkFeature } from '@giulio-leone/ai-config';
 import type { LanguageModel } from 'ai';
 
 export interface ModelConfig {

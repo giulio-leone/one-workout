@@ -6,7 +6,17 @@
  */
 
 import { z } from 'zod';
-import { registerSchemas, ProgressFieldSchema } from '@giulio-leone/one-agent/framework';
+
+// Local stubs replacing @giulio-leone/one-agent/framework (legacy SDK removed)
+function registerSchemas(_schemas: Record<string, z.ZodSchema>): void { /* no-op */ }
+const ProgressFieldSchema = z.object({
+  step: z.string(),
+  userMessage: z.string(),
+  adminDetails: z.string().optional(),
+  estimatedProgress: z.number().min(0).max(100),
+  iconHint: z.enum(['search', 'analyze', 'compare', 'filter', 'loading', 'success', 'error']).optional(),
+  toolName: z.string().optional(),
+});
 
 // ==================== ENUMS ====================
 

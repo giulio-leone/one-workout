@@ -8,7 +8,9 @@
  */
 
 import { AIModelService, AIFrameworkConfigService, FrameworkFeature } from '@giulio-leone/ai-config';
-import type { LanguageModel } from 'ai';
+
+/** Local type replacing Vercel AI SDK LanguageModel */
+type LanguageModel = { readonly provider: string; readonly modelId: string; [key: string]: unknown };
 
 export interface ModelConfig {
   modelId: string;

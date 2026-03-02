@@ -48,3 +48,14 @@ export const REPO_TOKENS = {
   AI_MODEL: 'AI_MODEL_REPOSITORY',
   ADMIN: 'ADMIN_REPOSITORY',
 };
+
+// Getter helpers that mirror packages/core/src/index.ts
+export function getWorkoutTemplateRepo() {
+  return ServiceRegistry.getInstance().resolve(REPO_TOKENS.WORKOUT_TEMPLATE);
+}
+export function getWorkoutSessionRepo() {
+  return ServiceRegistry.getInstance().resolve(REPO_TOKENS.WORKOUT_SESSION);
+}
+export function getWorkoutRepo() {
+  return ServiceRegistry.getInstance().resolve(REPO_TOKENS.WORKOUT);
+}

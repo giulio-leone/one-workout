@@ -25,3 +25,11 @@ export function toExerciseArrayTyped(arr: unknown[]): unknown[] {
   return arr;
 }
 
+export function deepClone<T>(obj: T): T {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+export const AI_REASONING_CONFIG = {
+  DEFAULT_REASONING_EFFORT: 'medium' as const,
+};
+

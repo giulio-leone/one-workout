@@ -59,7 +59,6 @@
     "@giulio-leone/lib-shared": "workspace:*",
     "@giulio-leone/schemas": "workspace:*",
     "@giulio-leone/types": "workspace:*",
-    "ai": "6.0.105",
     "xlsx": "^0.18.5",
     "zod": "4.3.6"
   },

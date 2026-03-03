@@ -14,7 +14,7 @@
 
 import { z } from 'zod';
 // Local stub replacing @giulio-leone/one-agent/framework (legacy SDK removed)
-function registerTransforms(_transforms: Record<string, (...args: unknown[]) => unknown>): void { /* no-op */ }
+function registerTransforms(_transforms: Record<string, (...args: never[]) => unknown>): void { /* no-op */ }
 import {
   assembleWeeksFromDiffs,
   validateWeeksConsistency,

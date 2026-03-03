@@ -43,7 +43,7 @@ export class WorkoutGenerationConfigService {
 
     return {
       modelId: standardizedConfig.modelId,
-      model: standardizedConfig.model,
+      model: standardizedConfig.model as LanguageModel,
       maxTokens: standardizedConfig.maxTokens,
       providerOptions: standardizedConfig.providerOptions,
     };

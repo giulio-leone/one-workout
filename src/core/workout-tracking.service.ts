@@ -25,6 +25,7 @@ import type {
   WorkoutProgramStats,
 } from '@giulio-leone/types/workout';
 import type { Exercise, SetGroup } from '@giulio-leone/types';
+import type { SetGroup as SchemaSetGroup } from '@giulio-leone/schemas';
 
 /** Loose JSON structure for workout week from DB */
 interface JsonWeek {
@@ -152,7 +153,7 @@ export async function createWorkoutSession(
               `[createWorkoutSession] Hydrating setGroups for exercise ${ex.name || ex.id}`
             );
             // Usa helper SSOT per idratare i setGroups
-            ex.setGroups = hydrateSetGroups(ex.setGroups);
+            ex.setGroups = hydrateSetGroups(ex.setGroups as unknown as SchemaSetGroup[]) as unknown as typeof ex.setGroups;
           } else {
             // Se non ci sono setGroups, inizializza array vuoto
             ex.setGroups = [];

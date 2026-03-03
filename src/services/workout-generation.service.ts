@@ -76,8 +76,8 @@ export function initializeWorkoutGeneration(options: { basePath?: string } = {})
  * @returns Generated workout program
  */
 export async function generateWorkoutProgram(
-  input: WorkoutGenerationInput,
-  options: GenerateOptions = {}
+  _input: WorkoutGenerationInput,
+  _options: GenerateOptions = {}
 ): Promise<WorkoutGenerationResult> {
   // Legacy SDK execute() removed — use Gauss Agent.run() via gauss-agents package
   throw new Error('Legacy generateWorkoutProgram() is deprecated. Use Gauss workout agent instead.');

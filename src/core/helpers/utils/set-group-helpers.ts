@@ -145,7 +145,7 @@ export function getExerciseSets(exercise: Exercise): ExerciseSet[] {
   if (!exercise.setGroups || exercise.setGroups.length === 0) {
     return [];
   }
-  return getExpandedSets(exercise.setGroups);
+  return getExpandedSets(exercise.setGroups as SetGroup[]);
 }
 
 /**
@@ -161,6 +161,7 @@ export function createSetGroupFromParams(
   baseSetParams: Partial<ExerciseSet> & { rest: number }
 ): SetGroup {
   const baseSet: ExerciseSet = {
+    setType: baseSetParams.setType ?? 'straight',
     reps: baseSetParams.reps,
     repsMax: baseSetParams.repsMax,
     duration: baseSetParams.duration,
@@ -226,7 +227,7 @@ export function calculateExerciseVolume(exercise: Exercise): number {
   }
 
   return exercise.setGroups.reduce(
-    (total: number, group: SetGroup) => total + calculateSetGroupVolume(group),
+    (total, group) => total + calculateSetGroupVolume(group as SetGroup),
     0
   );
 }
@@ -239,7 +240,7 @@ export function countExerciseSets(exercise: Exercise): number {
     return 0;
   }
 
-  return exercise.setGroups.reduce((total: number, group: SetGroup) => total + group.count, 0);
+  return exercise.setGroups.reduce((total, group) => total + (group as SetGroup).count, 0);
 }
 
 /**

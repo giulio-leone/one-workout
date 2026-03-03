@@ -68,8 +68,8 @@ export function initializeExerciseGeneration(options: { basePath?: string } = {}
  * @returns Generated exercises
  */
 export async function generateExercises(
-  input: ExerciseGenerationInput,
-  options: GenerateOptions = {}
+  _input: ExerciseGenerationInput,
+  _options: GenerateOptions = {}
 ): Promise<ExerciseGenerationResult> {
   // Legacy SDK execute() removed — use Gauss Agent.run() via gauss-agents package
   throw new Error('Legacy generateExercises() is deprecated. Use Gauss exercise agent instead.');

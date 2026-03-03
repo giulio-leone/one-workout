@@ -28,9 +28,23 @@ import { WorkoutWeekSchema } from '../schema';
 export const LocalizedExerciseSchema = z.object({
   id: z.string(),
   name: z.string(),
+  slug: z.string().optional(),
   category: z.string().optional(),
   targetMuscles: z.array(z.string()).optional(),
   equipment: z.array(z.string()).optional(),
+  translation: z
+    .object({
+      name: z.string(),
+      description: z.string().optional(),
+    })
+    .optional(),
+  fallbackLocale: z.string().optional(),
+  muscles: z
+    .array(z.object({ name: z.string() }).passthrough())
+    .optional(),
+  equipments: z
+    .array(z.object({ name: z.string() }).passthrough())
+    .optional(),
 });
 
 /**

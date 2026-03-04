@@ -25,14 +25,7 @@ export {
 // Workout generation pipeline
 export * from './workout-generation-persistence.service';
 export * from './workout-generation-mapper';
-export * from './workout-generation-config.service';
-export * from './workout-generation-prompts';
-export * from './workout-generation-stream.service';
 export * from './workout-generation-utils';
 export * from './workout-normalization.service';
 export * from './program-builder';
 export * from './exercise-normalizer';
-
-// Workout agent utils
-export * from './agents/utils/sdk-input-builder';
-export * from './agents/utils/data-service';

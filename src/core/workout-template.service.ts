@@ -8,7 +8,7 @@
 
 import { getWorkoutTemplateRepo as getTemplateRepo } from '@giulio-leone/core';
 import { createId } from '@giulio-leone/lib-shared/id-generator';
-import { logger } from '@giulio-leone/lib-core';
+import { logger } from '@giulio-leone/lib-core/logger.service';
 import type {
   WorkoutTemplate,
   WorkoutTemplateType,

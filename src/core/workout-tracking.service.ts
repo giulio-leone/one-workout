@@ -17,7 +17,7 @@ import { createId } from '@giulio-leone/lib-shared/id-generator';
 import { deepClone } from '@giulio-leone/lib-shared';
 import { mapToWorkoutSession, mapToWorkoutSessions } from './mappers/workout-session.mapper';
 import { hydrateSetGroups } from './helpers/utils/set-group-helpers';
-import { logger } from '@giulio-leone/lib-core';
+import { logger } from '@giulio-leone/lib-core/logger.service';
 import type {
   WorkoutSession,
   CreateWorkoutSessionRequest,

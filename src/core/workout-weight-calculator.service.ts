@@ -20,7 +20,7 @@ import { prepareProgramForPersistence } from './transformers/program-transform';
 import { normalizeWorkoutProgram } from './normalizers/workout-normalizer';
 import { calculateSetWeights } from './calculators/weight-calculator';
 
-import { logger } from '@giulio-leone/lib-core';
+import { logger } from '@giulio-leone/lib-core/logger.service';
 
 /**
  * Calcola i pesi in un programma basandosi sugli 1RM dell'utente

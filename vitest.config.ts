@@ -11,6 +11,7 @@ export default defineConfig({
     alias: {
       '@giulio-leone/lib-shared/id-generator': path.resolve(__dirname, '__mocks__/@giulio-leone/lib-shared.ts'),
       '@giulio-leone/lib-shared': path.resolve(__dirname, '__mocks__/@giulio-leone/lib-shared.ts'),
+      '@giulio-leone/lib-core/logger.service': path.resolve(__dirname, '__mocks__/@giulio-leone/lib-core.ts'),
       '@giulio-leone/lib-core': path.resolve(__dirname, '__mocks__/@giulio-leone/lib-core.ts'),
       '@giulio-leone/core/repositories': path.resolve(__dirname, '__mocks__/@giulio-leone/core/repositories.ts'),
       '@giulio-leone/core': path.resolve(__dirname, '__mocks__/@giulio-leone/core/index.ts'),

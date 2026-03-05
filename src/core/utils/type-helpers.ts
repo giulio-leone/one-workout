@@ -2,7 +2,7 @@
  * Type Helpers
  *
  * Utility functions per type conversion e validation
- */ import { logger } from '@giulio-leone/lib-core';
+ */ import { logger } from '@giulio-leone/lib-core/logger.service';
 
 /**
  * Converte un valore sconosciuto in numero, con fallback

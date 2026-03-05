@@ -144,7 +144,7 @@ interface ExerciseSnapshot {
 // Nessuna duplicazione - tutti i service devono usare i tipi da lib-api come unica fonte di verità
 import type { ExercisesResponse } from '@giulio-leone/lib-api';
 
-import { logger } from '@giulio-leone/lib-core';
+import { logger } from '@giulio-leone/lib-core/logger.service';
 // Tipo helper per garantire che page, pageSize, total siano sempre presenti
 // Questo è compatibile con ExercisesResponse che li ha opzionali
 // NOTA: Questo è un tipo interno al service, non un'interfaccia pubblica duplicata

@@ -19,7 +19,7 @@ import type {
 import { createId } from '@giulio-leone/lib-shared';
 import { OneRepMaxInputSchema, type OneRepMaxInput } from '@giulio-leone/schemas';
 
-import { logger } from '@giulio-leone/lib-core';
+import { logger } from '@giulio-leone/lib-core/logger.service';
 
 /**
  * Input per creare/aggiornare un massimale
